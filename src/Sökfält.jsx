@@ -5,7 +5,7 @@ function Sökfält({onSearch}) {
    // State för vad användaren skriver i sökfältet
   const [search, setSearch] = useState ('')
 
-  // Debounce - körs varje gång search ändras
+  // Debounce körs varje gång search ändras
   useEffect (() => {
     const timer = setTimeout(() => {
   
@@ -24,7 +24,7 @@ function Sökfält({onSearch}) {
     
     <div>
 
-    {/* Uppdaterar search-state varje gång användaren skriver */}
+    {/* Uppdaterar search state varje gång användaren skriver */}
       <input placeholder="Search engine products"
       value={search}
       onChange={(e) => setSearch(e.target.value)} />

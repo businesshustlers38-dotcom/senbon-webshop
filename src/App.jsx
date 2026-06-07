@@ -21,7 +21,15 @@ function App() {
   // produkten med andra som finns med i vagnen
     function addToCart(product) {
       setCart([...cart, product])
+
+    
     }
+ 
+  // funktionen säger att tar bor en vis produkt från kundvagnen
+      function removeFromCart(index) {
+        const newCart = cart.filter((_, i) => i !== index)
+        setCart(newCart)
+      }
   return (
   
         <div>
@@ -32,7 +40,7 @@ function App() {
         <Sökfält onSearch={setSearch}/>
 
        {/* Kundvagnen tar emot cart arrayen som prop */}
-        <Cart cart={cart}/>
+        <Cart cart={cart} removeFromCart={removeFromCart}/>
 
         {/* React Router styr vilken sida som visas baserat på URL:en */}
         <Routes>
