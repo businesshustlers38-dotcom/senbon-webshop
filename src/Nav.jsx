@@ -8,9 +8,9 @@ function Nav() {
      <nav className="Meny">
 
        {/* Logo från public mappen */}
-      <img src="/Senbonlogo.jpg" alt="Senbon Zakura logo" height={50} />
+      <img className="nav-logo" src="/Senbonlogo.jpg" alt="Senbon Zakura logo" />
       
-      <ul className="Meny">
+      <ul className="Meny-lista">
         
  {/* Link från React Router navigerar utan att ladda om sidan */}
         <li><Link className="nav-länk" to="/">Hem</Link></li>

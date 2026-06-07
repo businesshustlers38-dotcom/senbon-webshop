@@ -66,6 +66,8 @@ return (
   <div>
 
     <h2>Products</h2>
+    
+    <div id="products">
 
   {/* Loopar igenom filtrerade produkter och skapar ett kort för varje */}
     {filtered.map(product => (
@@ -85,9 +87,12 @@ return (
        <button onClick={() => addToCart(product)} >Add to Cart</button>
       
       </div>
-    
+
+  
     ))}
 
+  </div>
+  
     </div>
 )
 }
