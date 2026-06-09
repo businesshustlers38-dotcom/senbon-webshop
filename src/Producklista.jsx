@@ -92,9 +92,25 @@ return (
     ))}
 
   </div>
-  
+
     </div>
 )
 }
+
+/*
+  Producklista.jsx Visar alla produkter från DummyJSON API
+
+  Vad den gör:
+  useEffect hämtar produkter från API:et en gång när sidan laddas
+  try/catch/finally hanterar fel om API:et inte svarar
+  loading state visar laddningsmeddelande medan data hämtas
+  error state visar felmeddelande om något går fel
+  filter filtrerar produkter baserat på söktexten från App.jsx
+  map loopar igenom produkterna och skapar ett kort för varje
+
+  Props den tar emot:
+  search från App.jsx för att filtrera produkter
+  addToCart från App.jsx för att lägga till i kundvagnen
+*/
 
 export default ProductList

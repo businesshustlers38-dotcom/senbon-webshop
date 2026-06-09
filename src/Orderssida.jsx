@@ -53,4 +53,18 @@ function Ordersida ({cart}) {
     </div>
   )
 }
+
+/*
+  Ordersida.jsx Orderöversikt och kassan
+
+  Vad den gör:
+  Visar alla produkter i kundvagnen med pris
+  reduce räknar ut totalpriset genom att addera alla priser
+  toFixed(2) formaterar priset till två decimaler
+  handleOrder kollar att namn och adress är ifyllda innan bekräftelse
+  confirmed state byter vy till bekräftelsemeddelande när ordern är lagd
+
+  Props den tar emot:
+  cart från App.jsx arrayen med alla valda produkter
+*/
 export default Ordersida

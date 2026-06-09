@@ -23,4 +23,15 @@ function Nav() {
   )
 }
 
+/*
+  Nav.jsx Navigationsfältet längst upp på sidan
+
+  Vad den gör:
+  Visar logotypen och navigeringslänkar
+  Link från React Router navigerar utan att ladda om sidan
+  Använder CSS-klasser från App.css för styling
+
+  Ingen props statisk komponent utan data
+*/
+
 export default Nav

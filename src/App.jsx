@@ -59,4 +59,20 @@ function App() {
   )
 }
 
+/*
+  App.jsx Huvudfilen och föräldern till alla komponenter
+
+  Vad den gör:
+  Håller cart state så både Producklista och Cart kan använda den
+  Håller search state så Sökfält och Producklista kan använda den
+  addToCart lägger till produkter i kundvagnen med spread operator ...cart
+  removeFromCart tar bort produkter med filter baserat på position
+  React Router styr vilken sida som visas baserat på URL:en
+
+  Props som skickas ned:
+  search och addToCart skickas till Producklista
+  cart och removeFromCart skickas till Cart
+  cart skickas till Ordersida
+*/
+
 export default App

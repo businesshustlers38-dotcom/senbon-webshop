@@ -30,4 +30,18 @@ function Cart ({cart, removeFromCart}) {
   )
 }
 
+/*
+  Cart.jsx Visar produkter i kundvagnen
+
+  Vad den gör:
+ Loopar igenom cart arrayen och visar varje produkts namn och pris
+ Använder index som key eftersom samma produkt kan läggas till flera gånger
+ Ta bort knappen anropar removeFromCart med produktens position
+ Link navigerar till ordersidan utan att ladda om sidan
+
+  Props den tar emot:
+  cart från App.jsx arrayen med alla valda produkter
+  removeFromCart från App.jsx funktionen som tar bort en produkt
+*/
+
 export default Cart

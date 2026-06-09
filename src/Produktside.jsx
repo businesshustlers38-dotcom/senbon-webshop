@@ -39,4 +39,16 @@ function Produktside () {
 
 }
 
+/*
+  Produktside.jsx Visar detaljerad information om en specifik produkt
+
+  Vad den gör:
+  useParams läser id från URL:en, till exempel /product/5 ger id = 5
+  useEffect hämtar produktdata från API:et baserat på id
+   Körs igen varje gång id ändras i URL:en
+  Visar laddningsmeddelande tills produkten är hämtad
+
+  Ingen props hämtar all data direkt från API:et via URL:en
+*/
+
 export default Produktside
