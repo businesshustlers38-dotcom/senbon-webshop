@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, createContext } from 'react'
 import Sökfält from './Sökfält'
 import ProductList from './Producklista'
 import Cart from './Cart'
@@ -7,6 +7,7 @@ import Produktside from './Produktside'
 import Ordersida from './Orderssida'
 import './App.css'
 import Nav from './Nav'
+export const CartContext = createContext()
 
 function App() {
 
@@ -32,15 +33,17 @@ function App() {
       }
   return (
   
+     <CartContext.Provider value={{cart, addToCart, removeFromCart}}>
+      
         <div>
             
-            <Nav>Senbon Zakura Webshop</Nav>
+            <Nav />
 
         {/* Sökfältet skickar setSearch som prop så det kan uppdatera search state i App.jsx */}
         <Sökfält onSearch={setSearch}/>
 
        {/* Kundvagnen tar emot cart arrayen som prop */}
-        <Cart cart={cart} removeFromCart={removeFromCart}/>
+        <Cart />
 
         {/* React Router styr vilken sida som visas baserat på URL:en */}
         <Routes>
@@ -53,9 +56,11 @@ function App() {
       <Route path='/product/:id' element= {<Produktside/>} />
 
         {/* Orderöversikten tar emot kundvagnen som prop */}
-      <Route path='/order' element={<Ordersida cart={cart}/>}/>
+      <Route path='/order' element={<Ordersida/>}/>
      </Routes>
   </div>
+  
+  </CartContext.Provider>
   )
 }
 

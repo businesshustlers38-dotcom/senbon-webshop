@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { CartContext } from "./App";
 
-function Ordersida ({cart}) {
+function Ordersida () {
+
+  const {cart} = useContext(CartContext)
 
    // State för namn och adress från formuläret
   const [name, setName] = useState('')

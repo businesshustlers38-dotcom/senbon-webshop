@@ -1,9 +1,12 @@
 
 import { Link } from "react-router-dom"
+import {CartContext} from './App'
+import { useContext } from "react"
 
 
+function Cart () {
 
-function Cart ({cart, removeFromCart}) {
+  const {cart, removeFromCart} = useContext(CartContext)
   return (
     <div>
       <h2>Cart</h2> 
@@ -33,7 +36,7 @@ function Cart ({cart, removeFromCart}) {
 /*
   Cart.jsx Visar produkter i kundvagnen
 
-  Vad den gör:
+ Vad den gör:
  Loopar igenom cart arrayen och visar varje produkts namn och pris
  Använder index som key eftersom samma produkt kan läggas till flera gånger
  Ta bort knappen anropar removeFromCart med produktens position
