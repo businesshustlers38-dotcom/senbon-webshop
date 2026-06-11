@@ -2,7 +2,7 @@ import { useState, createContext } from 'react'
 import Sökfält from './Sökfält'
 import ProductList from './Producklista'
 import Cart from './Cart'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Produktside from './Produktside'
 import Ordersida from './Orderssida'
 import './App.css'
@@ -16,6 +16,7 @@ function App() {
 
   // Det här state för kundvagen som börjar med en array
     const [cart, setCart] = useState ([])
+    const location = useLocation()
 
   // Den här funktionen säger till att kunden lägger produkt i kundevagen
   // ...cart säger till att den kopirerar befintliga produkter och lägger den nya 
@@ -39,8 +40,8 @@ function App() {
             
             <Nav />
 
-        {/* Sökfältet skickar setSearch som prop så det kan uppdatera search state i App.jsx */}
-        <Sökfält onSearch={setSearch}/>
+      {/* Sökfältet skickar setSearch som prop så det kan uppdatera search state i App.jsx */}
+        {location.pathname === '/' && <Sökfält onSearch={setSearch}/>}   
 
        {/* Kundvagnen tar emot cart arrayen som prop */}
         <Cart />

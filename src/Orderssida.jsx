@@ -28,31 +28,54 @@ function Ordersida () {
   }
 
   // Visar bekräftelsemeddelande när ordern är lagd
-  if (confirmed)
-    return <p>Order confirmed for {name}! Total: ${total.toFixed(2)}</p>
-
+  if (confirmed) {
+    
+    return (
+    <div className="order-confirmed">
+    <p>Order confirmed for {name}! Total: ${total.toFixed(2)}</p>
+  </div>
+    )
+  }
   return  (
-    <div>
+  
+  <div className="order-page">
+
+    <div className="order-card">
 
       <h2>Order Overview</h2>
+      {cart.length === 0 ? (
+        <p className="order-empty">Din Kundvagn är tom.</p>
+      ): (
+        
+        <ul className="order-items">
+          {cart.map((item, index) => (
+            <li key={index} className="order-item">
+              <span>{item.title}</span>
+              <span>{item.price}</span>
+
+            </li>
+          ))}
+        </ul>
+      )}
 
       
-    {/* Visar alla produkter i kundvagnen */}
-      {cart.map((item, index) =>(
-      <p key={index}>{item.title} - ${item.price}</p>
-
-      ))}
-
+  
        {/* Totalpriset formaterat till två decimaler */}
 
-      <p>Total: ${total.toFixed(2)}</p>
+      <p className="order-total">Total: ${total.toFixed(2)}</p>
+
+      <div className="order-form">
 
        {/* Formulär för personliga uppgifter */}
-      <input placeholder="Ditt namn" value={name} onChange={e => setName(e.target.value)}/>
-      <input placeholder="Din address" value={address} onChange={e => setAddress(e.target.value) }/>
+      <input className="order-input" placeholder="Ditt namn" value={name} onChange={e => setName(e.target.value)}/>
+      <input className="order-input" placeholder="Din address" value={address} onChange={e => setAddress(e.target.value) }/>
 
          {/* Bekräftar ordern när knappen klickas */}
-      <button onClick={handelorder}>Placera ordern</button>
+      <button className="order-btn" onClick={handelorder}>Placera ordern</button>
+  </div> 
+  
+   </div>
+
     </div>
   )
 }
