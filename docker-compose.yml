@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  kokoro-backend:
+    build: ./backend
+    container_name: kokoro-tts-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_PORT=5000
+      # Proxy settings (uncomment if behind a proxy)
+      # - HTTPS_PROXY=http://proxy.example.com:8080
+      # - HTTP_PROXY=http://proxy.example.com:8080
+      # - HF_HOME=/app/.cache/huggingface
+      # Hugging Face token (get from https://huggingface.co/settings/tokens)
+      # - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+    volumes:
+      - ./backend/audio_output:/app/audio_output
+      - hf_cache:/app/.cache/huggingface
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Optional: Frontend service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: senbon-webshop-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - kokoro-backend
+    environment:
+      - VITE_API_URL=http://kokoro-backend:5000
+    restart: unless-stopped
+
+volumes:
+  hf_cache:
+    driver: local
