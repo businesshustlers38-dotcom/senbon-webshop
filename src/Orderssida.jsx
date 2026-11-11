@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from './cartContext'
 import { formatPrice, FREE_SHIPPING_FROM, SHIPPING_COST } from './format'
-import { createOrder, isDemo } from './backend'
+import { placeOrder, isDemo } from './backend'
 
 // Enkel validering, returnerar ett objekt med felmeddelanden per fält
 function validate(form) {
@@ -45,19 +45,23 @@ function Ordersida() {
     setSending(true)
     setSendError('')
     try {
-      const order = await createOrder({
+      const result = await placeOrder({
         customer: { name: form.name.trim(), email: form.email.trim(), address: form.address.trim() },
-        // Sparar bara det som behövs om varje rad, inte hela produkten
-        items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
-        subtotal,
-        shipping,
-        total,
+        cart,
       })
-      setPlacedOrder(order)
+
+      if (result.type === 'redirect') {
+        // Till Stripes säkra betalsida. Kassen töms först när betalningen lyckats (/kassa/klar)
+        window.location.assign(result.url)
+        return
+      }
+
+      // Demo-läge: ordern är "lagd" direkt
+      setPlacedOrder({ ...result.order, total })
       clearCart()
+      setSending(false)
     } catch {
-      setSendError('Ordern kunde inte skickas. Kontrollera din anslutning och försök igen.')
-    } finally {
+      setSendError('Betalningen kunde inte startas. Kontrollera din anslutning och försök igen.')
       setSending(false)
     }
   }
@@ -110,11 +114,12 @@ function Ordersida() {
         {sendError && <p className="field-error" role="alert">{sendError}</p>}
 
         <button type="submit" className="btn btn-dark btn-block" disabled={sending}>
-          {sending ? 'Skickar…' : 'Lägg order'}
+          {sending ? 'Skickar…' : isDemo ? 'Lägg order' : `Gå till betalning · ${formatPrice(total)}`}
         </button>
         <p className="muted small">
-          Betalning läggs till senare. Inget kort debiteras.
-          {isDemo && ' Demo: ordern sparas bara i den här webbläsaren.'}
+          {isDemo
+            ? 'Demo: ingen betalning, ordern sparas bara i den här webbläsaren.'
+            : 'Du skickas till Stripes säkra betalsida. Kort, Klarna och Apple Pay.'}
         </p>
       </form>
 
@@ -141,7 +146,7 @@ function Ordersida() {
 
   Vad den gör:
   Validerar fälten och visar felmeddelanden under varje fält
-  Skickar ordern via backend.js (Supabase eller localStorage)
+  placeOrder i backend.js: Stripe-betalning om Supabase är inkopplat, annars demo-order
   Knappen visar "Skickar…" och är avstängd så ingen klickar två gånger
   Tömmer kassen och visar ordernummer när ordern är sparad
 */

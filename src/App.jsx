@@ -11,6 +11,7 @@ import RitualPage from './RitualPage'
 import Story from './Story'
 import OmOss from './OmOss'
 import Quiz from './Quiz'
+import OrderKlar from './OrderKlar'
 import Footer from './Footer'
 import ScrollToTop from './ScrollToTop'
 import { formatPrice, FREE_SHIPPING_FROM } from './format'
@@ -60,6 +61,7 @@ function App() {
           <Route path="/hitta-din-ritual" element={<Quiz />} />
           <Route path="/om-oss" element={<OmOss />} />
           <Route path="/kassa" element={<Ordersida />} />
+          <Route path="/kassa/klar" element={<OrderKlar />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
@@ -80,6 +82,7 @@ function App() {
   /hitta-din-ritual   Quiz
   /om-oss             Om oss
   /kassa              Kassa
+  /kassa/klar         Tack-sida efter Stripe-betalning
   *                   404
 */
 

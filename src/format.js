@@ -10,6 +10,6 @@ export function formatPrice(amount) {
   return formatter.format(amount)
 }
 
-// Frakt bor här så Cart och Ordersida använder exakt samma regler
-export const FREE_SHIPPING_FROM = 499
-export const SHIPPING_COST = 49
+// Fraktreglerna finns på ETT ställe: samma fil som servern räknar med.
+// Ändrar du gränsen där ändras både webbsidan och betalningen.
+export { FREE_SHIPPING_FROM, SHIPPING_COST } from '../supabase/functions/_shared/pricing.js'

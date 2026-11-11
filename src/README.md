@@ -30,18 +30,55 @@ npm run dev
 | `ProductImage.jsx` | SVG-illustrationer, eller riktigt foto om `image` finns |
 | `App.css` | Designsystemet, alla färger och typsnitt i `:root` |
 
-## Koppla in Supabase (riktig databas)
-Utan detta syns recensioner, prenumerationer och ordrar bara i din egen webbläsare.
+## Koppla in Supabase + Stripe (riktig databas och betalning)
+Utan detta körs sidan i demo-läge: allt sparas i webbläsaren och ingen betalning sker.
 
+```
+Webbläsare ── {id, antal} ──► create-checkout (server) ── riktiga priser ──► Stripe betalsida
+                                   │ sparar order "väntar"                        │
+                                   ▼                                              ▼
+                               orders-tabell ◄──── "betald" ──── stripe-webhook ◄─┘
+```
+
+### Steg 1: Supabase (databasen)
 1. Skapa ett gratis konto på supabase.com → **New project**
-2. Gå till **SQL Editor → New query**, klistra in hela `supabase/schema.sql` och tryck **Run**
-3. Gå till **Project Settings → API** och kopiera *Project URL* och *anon public key*
-4. Kopiera `.env.example` till `.env` i projektmappen och fyll i värdena
-5. Starta om `npm run dev`. I footern står det inte längre "lokalt läge".
+2. **SQL Editor → New query**: klistra in `supabase/schema.sql` → **Run**
+3. Ny query: klistra in `supabase/products.sql` → **Run** (lägger in alla priser)
+4. **Project Settings → API**: kopiera *Project URL* och *anon public key*
+5. Kopiera `.env.example` till `.env` och fyll i de två värdena
 
-Säkerhet: anon-nyckeln är gjord för att vara publik. Reglerna i `schema.sql` (RLS) gör att besökare
-bara kan *skriva* ordrar och prenumerationer, aldrig *läsa* andras. Lägg aldrig `service_role`-nyckeln i `.env`.
-Dina ordrar ser du i Supabase under **Table Editor → orders**.
+### Steg 2: Stripe (betalningen), i TESTLÄGE
+1. Skapa konto på stripe.com. Låt **Test mode** vara på (inga riktiga pengar)
+2. **Developers → API keys**: kopiera *Secret key* (börjar med `sk_test_`)
+3. **Settings → Payment methods**: slå på Klarna och Apple Pay om du vill
+
+### Steg 3: Deploya serverfunktionerna
+Kör i terminalen i projektmappen (byt ut `<projekt-ref>` mot ID:t i din Supabase-URL):
+```bash
+npx supabase login
+npx supabase link --project-ref <projekt-ref>
+npx supabase secrets set STRIPE_SECRET_KEY=sk_test_... SITE_URL=http://localhost:5173
+npx supabase functions deploy create-checkout
+npx supabase functions deploy stripe-webhook --no-verify-jwt
+```
+
+### Steg 4: Webhook (så ordern markeras som betald)
+1. Stripe → **Developers → Webhooks → Add endpoint**
+2. URL: `https://<projekt-ref>.supabase.co/functions/v1/stripe-webhook`
+3. Händelser: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`
+4. Kopiera *Signing secret* (`whsec_...`) och kör:
+   `npx supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...`
+
+### Steg 5: Testa
+Starta om `npm run dev`, lägg något i kassen och betala med testkortet
+`4242 4242 4242 4242`, valfritt framtida datum och valfri CVC.
+Kolla sedan Supabase → **Table Editor → orders**: status ska vara `betald`.
+
+### Säkerhetsregler (läs!)
+- `anon`-nyckeln får finnas i `.env` (den är publik). `service_role` och `sk_`-nycklar ALDRIG i `.env` eller i koden, bara i `supabase secrets`.
+- Ändrar du ett pris i `catalog.js`: kör `npm run db:products` och kör `supabase/products.sql` igen. Annars tar Stripe det gamla priset.
+- Prislogiken testas med `npm run test:pricing`.
+- Innan du tar riktiga pengar: byt till live-nycklar i Stripe, sätt `SITE_URL` till din riktiga domän, och läs på om moms, köpvillkor och ångerrätt (distansavtalslagen).
 
 ## Byta till riktiga produktfoton
 1. Fotografera alla produkter på samma sätt: samma ljusa bakgrund, samma vinkel, dagsljus från sidan

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer } from 'react'
+import { useCallback, useEffect, useMemo, useReducer } from 'react'
 import { CartContext } from './cartContext'
 
 // v2: formatet ändrades när vi bytte från DummyJSON till egen katalog.
@@ -46,7 +46,8 @@ function cartReducer(state, action) {
       return state.filter(item => item.id !== action.id)
 
     case 'clear':
-      return []
+      // Returnerar samma state om kassen redan är tom, så React slipper rita om
+      return state.length === 0 ? state : []
 
     default:
       return state
@@ -76,6 +77,9 @@ function CartProvider({ children }) {
     }
   }, [cart])
 
+  // clearCart får samma identitet varje gång (useCallback), så den kan ligga i en useEffect
+  const clearCart = useCallback(() => dispatch({ type: 'clear' }), [])
+
   // useMemo: räknar bara om när cart ändras, inte vid varje omritning
   const value = useMemo(() => {
     const count = cart.reduce((sum, item) => sum + item.qty, 0)
@@ -88,9 +92,9 @@ function CartProvider({ children }) {
       addToCart: (product, qty = 1) => dispatch({ type: 'add', product, qty }),
       setQty: (id, qty) => dispatch({ type: 'setQty', id, qty }),
       removeFromCart: id => dispatch({ type: 'remove', id }),
-      clearCart: () => dispatch({ type: 'clear' }),
+      clearCart,
     }
-  }, [cart])
+  }, [cart, clearCart])
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

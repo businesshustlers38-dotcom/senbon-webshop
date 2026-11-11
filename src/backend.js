@@ -83,27 +83,25 @@ export async function subscribe(email) {
   if (error && error.code !== '23505') throw error
 }
 
-// ===== Ordrar =====
-export async function createOrder(order) {
-  // Ordernumret skapas här så vi inte behöver läsa tillbaka från databasen
-  const number = `SZ-${Date.now().toString(36).toUpperCase()}`
-  const full = { number, ...order, date: new Date().toISOString() }
+// ===== Ordrar och betalning =====
+// Returnerar antingen:
+//   { type: 'redirect', url }  → Supabase + Stripe: skicka kunden till Stripes betalsida
+//   { type: 'done', order }    → demo-läge: ordern sparas lokalt, ingen betalning
+export async function placeOrder({ customer, cart }) {
+  // Webbläsaren skickar BARA id och antal. Priset räknas ut på servern.
+  const items = cart.map(i => ({ id: i.id, qty: i.qty }))
 
   if (isDemo) {
-    writeLocal('senbon-orders', [...readLocal('senbon-orders'), full])
-    return full
+    const number = `SZ-${Date.now().toString(36).toUpperCase()}`
+    const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0)
+    const order = { number, customer, items, date: new Date().toISOString() }
+    writeLocal('senbon-orders', [...readLocal('senbon-orders'), order])
+    return { type: 'done', order: { ...order, total } }
   }
 
-  const { error } = await supabase.from('orders').insert({
-    number,
-    name: order.customer.name,
-    email: order.customer.email,
-    address: order.customer.address,
-    items: order.items,
-    subtotal: order.subtotal,
-    shipping: order.shipping,
-    total: order.total,
+  const { data, error } = await supabase.functions.invoke('create-checkout', {
+    body: { items, customer },
   })
-  if (error) throw error
-  return full
+  if (error || !data?.url) throw error ?? new Error('Ingen betalningslänk')
+  return { type: 'redirect', url: data.url }
 }

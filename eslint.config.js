@@ -18,4 +18,14 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  // Supabase Edge Functions körs i Deno, inte i webbläsaren
+  {
+    files: ['supabase/functions/**/*.js'],
+    languageOptions: { globals: { Deno: 'readonly' } },
+  },
+  // Hjälpskript körs i Node
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: globals.node },
+  },
 ])

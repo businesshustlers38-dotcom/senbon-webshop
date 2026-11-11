@@ -29,7 +29,20 @@ create table if not exists newsletter (
 alter table newsletter enable row level security;
 create policy "Alla kan anmäla sig" on newsletter for insert with check (true);
 
--- ===== Ordrar: alla får skapa, INGEN får läsa (bara du i Supabase-panelen) =====
+-- ===== Produkter: priserna servern räknar med =====
+-- Fylls med supabase/products.sql (genereras med: npm run db:products)
+create table if not exists products (
+  id text primary key,
+  name text not null,
+  price numeric(10, 2) not null check (price >= 0),
+  active boolean not null default true
+);
+alter table products enable row level security;
+-- Inga policies = besökare kan varken läsa eller ändra. Bara Edge Functions (service_role).
+
+-- ===== Ordrar: skapas BARA av Edge Function create-checkout =====
+-- Ingen policy för besökare alls. Webbläsaren kan alltså inte skapa,
+-- läsa eller ändra ordrar. Det gör att ingen kan fuska med priset.
 create table if not exists orders (
   id bigint generated always as identity primary key,
   number text unique not null,
@@ -40,12 +53,8 @@ create table if not exists orders (
   subtotal numeric(10, 2) not null,
   shipping numeric(10, 2) not null,
   total numeric(10, 2) not null,
-  status text not null default 'ny',
+  status text not null default 'väntar på betalning',
+  stripe_session_id text,
   created_at timestamptz not null default now()
 );
 alter table orders enable row level security;
-create policy "Alla kan skapa ordrar" on orders for insert with check (true);
-
--- OBS: priserna i en order kommer från webbläsaren och går att fuska med.
--- Det är okej utan betalning. När betalning läggs till måste priset
--- räknas om på servern (t.ex. i en Supabase Edge Function med Stripe).
