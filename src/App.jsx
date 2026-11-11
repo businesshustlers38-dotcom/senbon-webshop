@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Nav from './Nav'
 import Cart from './Cart'
@@ -6,24 +6,29 @@ import ProductList from './Producklista'
 import Produktside from './Produktside'
 import Ordersida from './Orderssida'
 import Hero from './Hero'
+import Rituals from './Rituals'
+import RitualPage from './RitualPage'
+import Story from './Story'
 import Footer from './Footer'
+import ScrollToTop from './ScrollToTop'
 import './App.css'
 
 function App() {
   // Söktexten bor här (EN ägare) så den finns kvar när man går till en produkt och tillbaka
   const [search, setSearch] = useState('')
-
-  // Styr om kundvagnslådan är öppen
   const [cartOpen, setCartOpen] = useState(false)
+
+  // useCallback: samma funktion varje rendering, så Cart:s useEffect inte körs i onödan
+  const openCart = useCallback(() => setCartOpen(true), [])
+  const closeCart = useCallback(() => setCartOpen(false), [])
 
   return (
     <div className="app">
-      <p className="announcement">Free shipping on orders over $50 · Complimentary gift wrapping</p>
-      <Nav onCartClick={() => setCartOpen(true)} />
+      <ScrollToTop />
+      <p className="announcement">Free delivery on orders over 499 kr · Complimentary gift wrapping</p>
+      <Nav onCartClick={openCart} />
+      <Cart open={cartOpen} onClose={closeCart} />
 
-      <Cart open={cartOpen} onClose={() => setCartOpen(false)} />
-
-      {/* React Router styr vilken sida som visas baserat på URL:en */}
       <main className="main">
         <Routes>
           <Route
@@ -31,14 +36,15 @@ function App() {
             element={
               <>
                 <Hero />
+                <Rituals />
+                <Story />
                 <ProductList search={search} onSearch={setSearch} />
               </>
             }
           />
-          <Route
-            path="/product/:id"
-            element={<Produktside onAdded={() => setCartOpen(true)} />}
-          />
+          <Route path="/rituals" element={<div className="page-top"><Rituals /></div>} />
+          <Route path="/rituals/:slug" element={<RitualPage />} />
+          <Route path="/product/:id" element={<Produktside onAdded={openCart} />} />
           <Route path="/order" element={<Ordersida />} />
           <Route path="*" element={<p className="status">Page not found.</p>} />
         </Routes>
@@ -52,11 +58,13 @@ function App() {
 /*
   App.jsx Huvudfilen, bestämmer layout och sidor
 
-  Vad den gör:
-  Håller search state så sökningen överlever sidbyten
-  Håller cartOpen state för kundvagnslådan
-  Kundvagnens data ligger INTE här längre, den finns i CartProvider.jsx
-  path="*" fångar alla okända URL:er (404-sida)
+  Sidor:
+  /                  Startsida: hero, ritualer, berättelse, butik
+  /rituals           Alla ritualer
+  /rituals/:slug     En ritual med rutin och produkter
+  /product/:id       Produktsida
+  /order             Kassa
+  *                  404
 */
 
 export default App

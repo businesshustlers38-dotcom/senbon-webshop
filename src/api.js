@@ -1,44 +1,33 @@
-const BASE_URL = 'https://dummyjson.com'
-
-// Bara kategorier som passar en butik för vardagsprodukter
-export const CATEGORIES = [
-  { slug: 'skin-care', label: 'Skin Care' },
-  { slug: 'beauty', label: 'Beauty' },
-  { slug: 'fragrances', label: 'Fragrances' },
-  { slug: 'home-decoration', label: 'Home' },
-]
-
-export function categoryLabel(slug) {
-  return CATEGORIES.find(c => c.slug === slug)?.label ?? slug
-}
-
-// En gemensam hjälpfunktion så att ALLA anrop kollar res.ok
-// fetch kastar inget fel vid 404/500, så vi måste göra det själva
-async function getJSON(url, signal) {
-  const res = await fetch(url, { signal })
-  if (!res.ok) throw new Error(`HTTP Error: ${res.status}`)
-  return res.json()
-}
-
-// Hämtar alla kategorier samtidigt med Promise.all istället för en i taget
-// limit=0 betyder "alla produkter" (standard är bara 30)
-export async function fetchProducts(signal) {
-  const results = await Promise.all(
-    CATEGORIES.map(c =>
-      getJSON(`${BASE_URL}/products/category/${c.slug}?limit=0`, signal)
-    )
-  )
-  return results.flatMap(r => r.products)
-}
-
-export function fetchProduct(id, signal) {
-  return getJSON(`${BASE_URL}/products/${id}`, signal)
-}
+import { PRODUCTS, RITUALS } from './data/catalog'
 
 /*
-  api.js Allt som pratar med DummyJSON finns här
+  api.js Den enda dörren till produktdatan
 
-  Varför en egen fil: om vi byter till ett riktigt API eller egen backend
-  behöver vi bara ändra den här filen, inte varje komponent
-  signal kommer från AbortController och avbryter anrop när användaren lämnar sidan
+  Förut hämtade vi från DummyJSON, nu läser vi från vår egen catalog.js.
+  Funktionerna är fortfarande async och returnerar Promises,
+  så komponenterna behövde nästan inte ändras alls.
+  Byter du senare till en riktig backend (t.ex. Supabase eller Shopify)
+  ändrar du bara den här filen.
 */
+
+// Låtsas-fördröjning så laddningslägen syns precis som med ett riktigt API
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+export async function fetchProducts() {
+  await delay(150)
+  return PRODUCTS
+}
+
+export async function fetchProduct(id) {
+  await delay(100)
+  const product = PRODUCTS.find(p => p.id === id)
+  if (!product) throw new Error('Product not found')
+  return product
+}
+
+export async function fetchRitual(slug) {
+  await delay(100)
+  const ritual = RITUALS.find(r => r.slug === slug)
+  if (!ritual) throw new Error('Ritual not found')
+  return { ritual, products: PRODUCTS.filter(p => p.ritual === slug) }
+}

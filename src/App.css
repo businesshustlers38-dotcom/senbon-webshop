@@ -144,6 +144,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
 
 /* ===== Hero ===== */
 .hero {
+  position: relative; overflow: hidden;
   min-height: min(78vh, 680px);
   display: flex; align-items: flex-end;
   background:
@@ -153,7 +154,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
     var(--accent);
   color: #fff;
 }
-.hero-inner { text-shadow: 0 1px 12px rgba(0, 0, 0, 0.25); width: 100%; max-width: var(--max); margin: 0 auto; padding: 4rem var(--gutter); }
+.hero-inner { position: relative; z-index: 1; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.25); width: 100%; max-width: var(--max); margin: 0 auto; padding: 4rem var(--gutter); }
 .hero-title { font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 400; margin-bottom: 1rem; }
 .hero-text { max-width: 34rem; font-size: 1.05rem; margin: 0 0 2rem; opacity: 0.92; }
 
@@ -190,17 +191,24 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
 }
 .card { display: flex; flex-direction: column; }
 .card-media {
+  position: relative;
   aspect-ratio: 4 / 5;
-  background: var(--surface-2);
+  background: var(--tint, var(--surface-2));
   display: grid; place-items: center;
   overflow: hidden;
 }
-.card-media img {
-  width: 78%; height: 78%; object-fit: contain;
-  mix-blend-mode: multiply;
+.card-media svg, .card-media img {
+  width: 72%; height: 72%; object-fit: contain;
   transition: transform 0.6s var(--ease);
 }
-.card:hover .card-media img { transform: scale(1.05); }
+.card:hover .card-media svg, .card:hover .card-media img { transform: scale(1.05) translateY(-4px); }
+.badge {
+  position: absolute; top: 12px; left: 12px; z-index: 1;
+  padding: 0.25rem 0.6rem;
+  background: var(--surface); font-size: 0.65rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.size { font-size: 0.85rem; }
 .card-body { padding: 1rem 0 0.75rem; flex: 1; }
 .card-title { font-size: 1.3rem; margin-bottom: 0.35rem; }
 .card-title a { text-decoration: none; }
@@ -215,18 +223,17 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
 /* ===== Produktsida ===== */
 .pdp {
   max-width: var(--max); margin: 0 auto;
-  padding: 3rem var(--gutter) 5rem;
+  padding: 3rem var(--gutter) 4rem;
   display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
 }
-.pdp-image { aspect-ratio: 1; background: var(--surface-2); display: grid; place-items: center; }
-.pdp-image img { width: 80%; height: 80%; object-fit: contain; mix-blend-mode: multiply; }
-.pdp-thumbs { display: flex; gap: 0.75rem; margin-top: 0.75rem; flex-wrap: wrap; }
-.pdp-thumb {
-  width: 72px; height: 72px; padding: 6px;
-  background: var(--surface-2); border: 1px solid transparent;
+.pdp-image {
+  aspect-ratio: 1;
+  background: var(--tint, var(--surface-2));
+  display: grid; place-items: center;
+  position: sticky; top: 90px;
 }
-.pdp-thumb[aria-pressed="true"] { border-color: var(--ink); }
-.pdp-thumb img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.pdp-image svg, .pdp-image img { width: 70%; height: 70%; object-fit: contain; }
 
 .pdp-info { padding-top: 1rem; }
 .back-link { display: inline-block; margin-bottom: 2rem; font-size: 0.85rem; color: var(--muted); text-decoration: none; }
@@ -268,7 +275,8 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
 .drawer-empty { padding: 2rem 1.5rem; color: var(--muted); }
 .drawer-items { list-style: none; margin: 0; padding: 0 1.5rem; overflow-y: auto; flex: 1; }
 .line { display: grid; grid-template-columns: 72px 1fr auto; gap: 1rem; padding: 1.25rem 0; border-bottom: 1px solid var(--line); align-items: start; }
-.line-img { width: 72px; height: 88px; object-fit: contain; background: var(--surface-2); mix-blend-mode: multiply; }
+.line-img { width: 72px; height: 88px; background: var(--surface-2); display: grid; place-items: center; }
+.line-img svg { width: 80%; height: 80%; }
 .line-title { margin: 0; font-family: var(--font-display); font-size: 1.15rem; line-height: 1.2; }
 .line-price { margin: 0.2rem 0 0; font-size: 0.9rem; color: var(--muted); }
 .drawer-foot { padding: 1.25rem 1.5rem 1.5rem; border-top: 1px solid var(--line); margin-top: auto; }
@@ -324,12 +332,175 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
 }
 .footer-bottom .brand-name { font-size: 1.1rem; color: var(--ink); }
 
+/* ===== Hero: animationer ===== */
+.hero-ctas { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.btn-ghost { border-color: rgba(255, 255, 255, 0.8); color: #fff; background: transparent; }
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.15); }
+
+/* fade-up: texten glider upp och tonar in när sidan laddas */
+.fade-up { opacity: 0; animation: fadeUp 0.9s var(--ease) forwards; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Kronbladen: faller uppifrån och gungar i sidled */
+.petals { position: absolute; inset: 0; pointer-events: none; }
+.petal {
+  position: absolute; top: -20px;
+  background: #f6d6dc;
+  border-radius: 80% 0 80% 0;
+  opacity: 0.75;
+  animation-name: fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes fall {
+  0%   { transform: translate(0, -20px) rotate(0deg); }
+  50%  { transform: translate(40px, 50vh) rotate(180deg); }
+  100% { transform: translate(-20px, 100vh) rotate(360deg); }
+}
+
+/* ===== Gemensam sidbredd ===== */
+.wrap { max-width: var(--max); margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
+.page-top { padding-top: 1rem; }
+.text-link { font-size: 0.9rem; text-underline-offset: 4px; }
+
+/* ===== Ritualer ===== */
+.rituals { padding-top: 5rem; padding-bottom: 2rem; }
+.rituals-head { margin-bottom: 2rem; }
+.ritual-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.ritual-tile {
+  min-height: 320px; padding: 1.75rem;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 0.25rem;
+  background: var(--tile-bg); color: var(--tile-ink);
+  text-decoration: none;
+  transition: transform 0.4s var(--ease);
+}
+.ritual-tile:hover { transform: translateY(-6px); }
+.ritual-mood { font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.8; margin-bottom: auto; }
+.ritual-name { font-family: var(--font-display); font-size: 2rem; line-height: 1.1; }
+.ritual-tagline { font-size: 0.9rem; opacity: 0.85; }
+.ritual-cta { margin-top: 1rem; font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; }
+
+.ritual-hero { background: var(--hero-bg); padding: 5rem 0 4rem; }
+.ritual-hero.is-dark { color: #f3efe6; }
+.ritual-hero.is-dark .eyebrow { color: rgba(243, 239, 230, 0.8); }
+.ritual-hero .hero-text { max-width: 40rem; }
+
+.steps { padding-top: 4rem; }
+.step-list { list-style: none; padding: 0; margin: 2rem 0 0; border-top: 1px solid var(--line); }
+.step-list li {
+  display: grid; grid-template-columns: 4rem 1fr auto; gap: 1rem; align-items: baseline;
+  padding: 1.25rem 0; border-bottom: 1px solid var(--line);
+}
+.step-num { font-family: var(--font-display); font-size: 1.8rem; color: var(--accent); }
+.step-list strong { font-family: var(--font-display); font-size: 1.35rem; font-weight: 500; }
+.step-list p { margin: 0.2rem 0 0; }
+
+/* ===== Berättelse ===== */
+.story { background: var(--surface); margin-top: 4rem; }
+.story-inner { padding-top: 5rem; padding-bottom: 5rem; text-align: center; max-width: 52rem; }
+.story-quote { font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2.2rem); line-height: 1.35; margin: 0; }
+
+/* ===== Butikens verktygsrad ===== */
+.toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.toolbar .chips { margin-bottom: 0; }
+.sort select {
+  padding: 0.55rem 2rem 0.55rem 0.9rem;
+  background: transparent; border: 1px solid var(--line); border-radius: 999px;
+  font: inherit; font-size: 0.85rem; color: var(--ink);
+}
+.result-count { margin: 0 0 1.5rem; }
+
+/* ===== Produktsida: extra ===== */
+.breadcrumb { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; }
+.breadcrumb a { color: inherit; text-underline-offset: 3px; }
+.rating-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; text-decoration: none; margin-bottom: 0.75rem; }
+.notes { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; margin: 0 0 2rem; }
+.notes li { padding: 0.3rem 0.8rem; border: 1px solid var(--line); border-radius: 999px; font-size: 0.8rem; }
+
+.accordion { border-top: 1px solid var(--line); }
+.accordion details { border-bottom: 1px solid var(--line); }
+.accordion summary {
+  list-style: none; cursor: pointer;
+  display: flex; justify-content: space-between;
+  padding: 1.1rem 0;
+  font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase;
+}
+.accordion summary::-webkit-details-marker { display: none; }
+.accordion summary::after { content: '+'; font-size: 1.1rem; line-height: 1; }
+.accordion details[open] summary::after { content: '−'; }
+.accordion details p { margin: 0 0 1.1rem; color: var(--muted); }
+.accordion .text-link { display: inline-block; margin-bottom: 1.1rem; }
+
+/* ===== Recensioner ===== */
+.reviews { padding: 3rem 0; border-top: 1px solid var(--line); }
+.reviews-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1.5rem; }
+.reviews-head .section-title { font-size: 2rem; margin-bottom: 0.4rem; }
+.reviews-summary { display: flex; align-items: center; gap: 0.5rem; margin: 0; }
+.stars { display: inline-flex; gap: 2px; letter-spacing: 0; }
+.star { color: var(--line); }
+.star.on { color: var(--gold); }
+.review-form { max-width: 34rem; background: var(--surface); padding: 1.5rem; border: 1px solid var(--line); margin-bottom: 2rem; }
+.rating-input { border: 0; padding: 0; margin: 0 0 1rem; display: flex; gap: 0.25rem; }
+.rating-input legend { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.4rem; padding: 0; }
+.rating-input label { font-size: 1.8rem; cursor: pointer; line-height: 1; }
+.rating-input label:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.field textarea {
+  width: 100%; padding: 0.85rem 1rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  font: inherit; color: var(--ink); resize: vertical;
+}
+.field textarea:focus { outline: none; border-color: var(--ink); }
+.review-actions { display: flex; align-items: center; gap: 1.25rem; }
+.review-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; }
+.review { padding: 1.25rem 0; border-bottom: 1px solid var(--line); }
+.review-text { margin: 0.5rem 0; }
+
+.related { padding-top: 2rem; padding-bottom: 4rem; }
+.related .section-title { margin-bottom: 2rem; }
+
+/* ===== Fri frakt-stapel i kundvagnen ===== */
+.ship-progress { padding: 1rem 1.5rem; background: var(--bg); font-size: 0.85rem; }
+.ship-progress p { margin: 0 0 0.5rem; }
+.bar { height: 3px; background: var(--line); }
+.bar span { display: block; height: 100%; background: var(--accent); transition: width 0.5s var(--ease); }
+
+/* ===== Footer: nyhetsbrev och länkar ===== */
+.footer-main {
+  max-width: var(--max); margin: 0 auto; padding: 3rem var(--gutter);
+  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2.5rem;
+  border-top: 1px solid var(--line);
+}
+.footer-col h2 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.footer-col h3 { font-family: var(--font-body); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 1rem; }
+.footer-col ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; font-size: 0.9rem; }
+.footer-col a { text-decoration: none; }
+.footer-col a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.newsletter { display: flex; flex-wrap: wrap; gap: 0.5rem; max-width: 30rem; }
+.newsletter input {
+  flex: 1; min-width: 200px; padding: 0.85rem 1rem;
+  background: var(--surface); border: 1px solid var(--line); font: inherit; color: var(--ink);
+}
+.newsletter input:focus { outline: none; border-color: var(--ink); }
+.newsletter .field-error { width: 100%; }
+.newsletter-done { font-family: var(--font-display); font-size: 1.3rem; }
+
 /* ===== Mobil ===== */
 @media (max-width: 800px) {
   .nav { grid-template-columns: 1fr auto; }
   .nav-links { display: none; }
   .brand-name { font-size: 1.2rem; }
   .pdp, .checkout { grid-template-columns: 1fr; }
+  .pdp-image { position: relative; top: 0; }
+  .ritual-grid { grid-template-columns: 1fr 1fr; }
+  .ritual-tile { min-height: 220px; padding: 1.25rem; }
+  .ritual-name { font-size: 1.5rem; }
+  .footer-main { grid-template-columns: 1fr 1fr; }
+  .footer-signup { grid-column: 1 / -1; }
+  .step-list li { grid-template-columns: 3rem 1fr; }
+  .step-list li > .eyebrow { display: none; }
   .summary { position: static; order: -1; }
   .grid { grid-template-columns: repeat(2, 1fr); gap: 2rem 1rem; }
   .card-title { font-size: 1.1rem; }
@@ -338,4 +509,6 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
 /* Respekterar användare som vill ha mindre rörelse */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+  .fade-up { animation: none; opacity: 1; }
+  .petals { display: none; }
 }

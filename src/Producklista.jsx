@@ -1,115 +1,101 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { fetchProducts, CATEGORIES, categoryLabel } from './api'
-import { useCart } from './cartContext'
-import { formatPrice } from './format'
+import { fetchProducts } from './api'
+import { CATEGORIES, getRitual } from './data/catalog'
+import ProductCard from './ProductCard'
 import Sökfält from './Sökfält'
 
+// Sorteringsalternativ: varje alternativ har en jämförelsefunktion
+const SORTS = {
+  featured: { label: 'Featured', compare: () => 0 },
+  'price-asc': { label: 'Price: low to high', compare: (a, b) => a.price - b.price },
+  'price-desc': { label: 'Price: high to low', compare: (a, b) => b.price - a.price },
+  name: { label: 'Name A–Z', compare: (a, b) => a.name.localeCompare(b.name) },
+}
+
 function ProductList({ search, onSearch }) {
-  const { addToCart } = useCart()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [category, setCategory] = useState('all')
-
-  // Ökas för att köra hämtningen igen när man klickar "Try again"
-  const [retry, setRetry] = useState(0)
+  const [sort, setSort] = useState('featured')
 
   useEffect(() => {
-    // AbortController avbryter hämtningen om komponenten försvinner
-    const controller = new AbortController()
+    // ignore: om komponenten försvinner innan svaret kommer sparar vi inget
+    let ignore = false
+    fetchProducts()
+      .then(data => !ignore && setProducts(data))
+      .catch(err => !ignore && setError(err.message))
+      .finally(() => !ignore && setLoading(false))
+    return () => { ignore = true }
+  }, [])
 
-    async function load() {
-      setLoading(true)
-      setError(null)
-      try {
-        setProducts(await fetchProducts(controller.signal))
-      } catch (err) {
-        // AbortError är inget riktigt fel, vi avbröt själva
-        if (err.name !== 'AbortError') setError(err.message)
-      } finally {
-        if (!controller.signal.aborted) setLoading(false)
-      }
-    }
-
-    load()
-    return () => controller.abort()
-  }, [retry])
-
-  // Filtrerar på kategori OCH söktext (titel, varumärke eller kategori)
+  // Söker i namn, ritual och doftnoter, så "yuzu" hittar alla yuzu-produkter
   const query = search.toLowerCase()
-  const filtered = products.filter(p => {
-    const inCategory = category === 'all' || p.category === category
-    const text = `${p.title} ${p.brand ?? ''} ${p.category}`.toLowerCase()
-    return inCategory && text.includes(query)
-  })
+  const visible = products
+    .filter(p => category === 'all' || p.category === category)
+    .filter(p => {
+      const text = [p.name, getRitual(p.ritual).name, ...p.notes].join(' ').toLowerCase()
+      return text.includes(query)
+    })
+    // [...] kopierar arrayen först, sort() ändrar annars originalet
+  const sorted = [...visible].sort(SORTS[sort].compare)
 
   return (
     <section className="shop" id="shop">
       <div className="shop-head">
-        <h2 className="section-title">Shop the rituals</h2>
+        <div>
+          <p className="eyebrow">All products</p>
+          <h2 className="section-title">Shop everyday essentials</h2>
+        </div>
         <Sökfält value={search} onSearch={onSearch} />
       </div>
 
-      {/* Kategoriknappar, aria-pressed berättar för skärmläsare vilken som är vald */}
-      <div className="chips" role="group" aria-label="Filter by category">
-        {[{ slug: 'all', label: 'All' }, ...CATEGORIES].map(c => (
-          <button
-            key={c.slug}
-            className="chip"
-            aria-pressed={category === c.slug}
-            onClick={() => setCategory(c.slug)}
-          >
-            {c.label}
-          </button>
-        ))}
+      <div className="toolbar">
+        <div className="chips" role="group" aria-label="Filter by category">
+          {[{ slug: 'all', label: 'All' }, ...CATEGORIES].map(c => (
+            <button
+              key={c.slug}
+              className="chip"
+              aria-pressed={category === c.slug}
+              onClick={() => setCategory(c.slug)}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+
+        <label className="sort">
+          <span className="visually-hidden">Sort products</span>
+          <select value={sort} onChange={e => setSort(e.target.value)}>
+            {Object.entries(SORTS).map(([key, s]) => (
+              <option key={key} value={key}>{s.label}</option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {loading && <p className="status">Loading products…</p>}
-
-      {error && (
-        <div className="status">
-          <p>Could not load products ({error}).</p>
-          <button className="btn btn-outline" onClick={() => setRetry(r => r + 1)}>Try again</button>
-        </div>
-      )}
-
-      {!loading && !error && filtered.length === 0 && (
+      {error && <p className="status">Could not load products ({error}).</p>}
+      {!loading && !error && sorted.length === 0 && (
         <p className="status">No products match “{search}”.</p>
       )}
 
+      {!loading && sorted.length > 0 && <p className="muted small result-count">{sorted.length} products</p>}
+
       <div className="grid">
-        {filtered.map(product => (
-          <article key={product.id} className="card">
-            <Link to={`/product/${product.id}`} className="card-media">
-              <img src={product.thumbnail} alt={product.title} loading="lazy" />
-            </Link>
-            <div className="card-body">
-              <p className="eyebrow">{categoryLabel(product.category)}</p>
-              <h3 className="card-title">
-                <Link to={`/product/${product.id}`}>{product.title}</Link>
-              </h3>
-              <p className="price">{formatPrice(product.price)}</p>
-            </div>
-            <button className="btn btn-dark card-btn" onClick={() => addToCart(product)}>
-              Add to bag
-            </button>
-          </article>
-        ))}
+        {sorted.map(product => <ProductCard key={product.id} product={product} />)}
       </div>
     </section>
   )
 }
 
 /*
-  Producklista.jsx Visar produkter från DummyJSON
+  Producklista.jsx Butiken
 
   Vad den gör:
-  Hämtar bara vardagskategorier (hudvård, skönhet, doft, hem) via api.js
-  AbortController stoppar anropet om användaren lämnar sidan
-  "Try again" kör hämtningen igen genom att ändra retry
-  Filtrerar på både kategori och söktext
-  Fix: förut hämtades bara 30 produkter, nu hämtas alla i valda kategorier
+  Hämtar produkter från api.js (som läser vår egen catalog.js)
+  Filtrerar på kategori och söktext, sorterar med valt alternativ
+  ProductCard ritar varje kort, samma komponent används på flera sidor
 */
 
 export default ProductList

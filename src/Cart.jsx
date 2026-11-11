@@ -1,10 +1,15 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from './cartContext'
-import { formatPrice } from './format'
+import { formatPrice, FREE_SHIPPING_FROM } from './format'
+import ProductImage from './ProductImage'
 
 function Cart({ open, onClose }) {
   const { cart, subtotal, setQty, removeFromCart } = useCart()
+
+  // Hur mycket som saknas till fri frakt, och hur långt stapeln ska fyllas
+  const left = Math.max(0, FREE_SHIPPING_FROM - subtotal)
+  const progress = Math.min(100, (subtotal / FREE_SHIPPING_FROM) * 100)
 
   // Stänger lådan med Escape-tangenten och låser scroll bakom den
   useEffect(() => {
@@ -34,6 +39,13 @@ function Cart({ open, onClose }) {
           <button className="icon-btn" onClick={onClose} aria-label="Close bag">✕</button>
         </div>
 
+        {cart.length > 0 && (
+          <div className="ship-progress">
+            <p>{left > 0 ? <>You are <strong>{formatPrice(left)}</strong> away from free delivery</> : 'You have unlocked free delivery'}</p>
+            <div className="bar"><span style={{ width: `${progress}%` }} /></div>
+          </div>
+        )}
+
         {cart.length === 0 ? (
           <p className="drawer-empty">Your bag is empty.</p>
         ) : (
@@ -41,14 +53,14 @@ function Cart({ open, onClose }) {
             {/* Produktens id som key, nu finns varje produkt bara en gång */}
             {cart.map(item => (
               <li key={item.id} className="line">
-                <img src={item.thumbnail} alt="" className="line-img" />
+                <div className="line-img"><ProductImage product={item} /></div>
                 <div className="line-info">
-                  <p className="line-title">{item.title}</p>
-                  <p className="line-price">{formatPrice(item.price)}</p>
+                  <p className="line-title">{item.name}</p>
+                  <p className="line-price">{item.size} · {formatPrice(item.price)}</p>
                   <div className="qty qty-sm">
-                    <button onClick={() => setQty(item.id, item.qty - 1)} aria-label={`Decrease ${item.title}`}>−</button>
+                    <button onClick={() => setQty(item.id, item.qty - 1)} aria-label={`Decrease ${item.name}`}>−</button>
                     <span>{item.qty}</span>
-                    <button onClick={() => setQty(item.id, item.qty + 1)} aria-label={`Increase ${item.title}`}>+</button>
+                    <button onClick={() => setQty(item.id, item.qty + 1)} aria-label={`Increase ${item.name}`}>+</button>
                   </div>
                 </div>
                 <button className="link-btn" onClick={() => removeFromCart(item.id)}>Remove</button>

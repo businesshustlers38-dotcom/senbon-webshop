@@ -10,7 +10,13 @@ En premium-butik för vardagsprodukter (hudvård, skönhet, doft, hem) byggd med
 ## Struktur
 | Fil | Ansvar |
 |---|---|
-| `api.js` | All kommunikation med DummyJSON (kategorier, felhantering, avbrytning) |
+| `data/catalog.js` | Butikens egna produkter, ritualer och kategorier (priser i SEK) |
+| `api.js` | Den enda dörren till datan, async så den kan bytas mot en riktig backend |
+| `ProductImage.jsx` | SVG-illustrationer i ritualens färger (byts mot foton via `image`) |
+| `ProductCard.jsx` | Produktkort som återanvänds överallt |
+| `Rituals.jsx` / `RitualPage.jsx` | Shoppa per ritual, med steg-för-steg-rutin |
+| `Reviews.jsx` + `useReviews.js` | Recensioner med stjärnor (sparas i webbläsaren) |
+| `Hero.jsx` / `Story.jsx` / `Footer.jsx` | Startsidans hero med kronblad, berättelse, nyhetsbrev |
 | `CartProvider.jsx` + `cartContext.js` | Kundvagnen: useReducer, antal, localStorage |
 | `format.js` | Prisformat med Intl.NumberFormat |
 | `Producklista.jsx` / `Sökfält.jsx` | Butiken, kategorifilter, sök med debounce |
@@ -23,9 +29,12 @@ En premium-butik för vardagsprodukter (hudvård, skönhet, doft, hem) byggd med
 Sökrutan väntar 300ms efter sista tangenttrycket innan listan filtreras lokalt.
 Det gör att listan inte ritas om vid varje bokstav. (Inget API-anrop görs vid sökning.)
 
+## Lägga till en produkt
+Kopiera ett objekt i `PRODUCTS` i `data/catalog.js`, ge det ett unikt `id` och ändra texterna.
+Riktigt foto: lägg bilden i `public/` och skriv `image: '/bild.jpg'` på produkten.
+
 ## Felhantering
-`api.js` kollar `res.ok` för alla anrop. Produktlistan har en "Try again"-knapp
-och produktsidan visar ett fel om produkten inte finns.
+Produktsidan och ritualsidan visar ett tydligt fel om produkten/ritualen inte finns.
 
 ## Nästa steg
 - Betalning med Stripe Checkout (kräver en liten backend, t.ex. Vercel-funktion)

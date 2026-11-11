@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useReducer } from 'react'
 import { CartContext } from './cartContext'
 
-const STORAGE_KEY = 'senbon-cart'
+// v2: formatet ändrades när vi bytte från DummyJSON till egen katalog.
+// Ny nyckel = gamla, inkompatibla kundvagnar ignoreras istället för att krascha sidan.
+const STORAGE_KEY = 'senbon-cart-v2'
 
 // Kundvagnen sparar FAKTA (vilken produkt + hur många), inte klick.
-// Förut: [tvål, tvål, tvål]  →  Nu: [{ id: 5, title: 'tvål', qty: 3 }]
+// Förut: [tvål, tvål, tvål]  →  Nu: [{ id: 'hinoki-bar-soap', qty: 3 }]
 function cartReducer(state, action) {
   switch (action.type) {
     case 'add': {
@@ -23,10 +25,11 @@ function cartReducer(state, action) {
         ...state,
         {
           id: product.id,
-          title: product.title,
+          name: product.name,
           price: product.price,
-          thumbnail: product.thumbnail,
-          category: product.category,
+          size: product.size,
+          shape: product.shape,
+          ritual: product.ritual,
           qty,
         },
       ]

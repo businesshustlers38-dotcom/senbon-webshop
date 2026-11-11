@@ -16,6 +16,7 @@ function Nav({ onCartClick }) {
         <ul className="nav-links">
           {/* NavLink får klassen "active" automatiskt när man är på sidan */}
           <li><NavLink className="nav-link" to="/" end>Shop</NavLink></li>
+          <li><NavLink className="nav-link" to="/rituals">Rituals</NavLink></li>
           <li><NavLink className="nav-link" to="/order">Checkout</NavLink></li>
         </ul>
 

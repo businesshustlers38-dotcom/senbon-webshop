@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from './cartContext'
-import { formatPrice } from './format'
-
-const SHIPPING_FREE_FROM = 50
-const SHIPPING_COST = 4.95
+import { formatPrice, FREE_SHIPPING_FROM, SHIPPING_COST } from './format'
 
 // Enkel validering, returnerar ett objekt med felmeddelanden per fält
 function validate(form) {
@@ -23,7 +20,7 @@ function Ordersida() {
   // Sparar den lagda ordern så bekräftelsen kan visas efter att kundvagnen tömts
   const [placedOrder, setPlacedOrder] = useState(null)
 
-  const shipping = subtotal >= SHIPPING_FREE_FROM || subtotal === 0 ? 0 : SHIPPING_COST
+  const shipping = subtotal >= FREE_SHIPPING_FROM || subtotal === 0 ? 0 : SHIPPING_COST
   const total = subtotal + shipping
 
   // En funktion för alla fält, name-attributet bestämmer vilket fält som ändras
@@ -106,7 +103,7 @@ function Ordersida() {
         <ul className="summary-items">
           {cart.map(item => (
             <li key={item.id}>
-              <span>{item.qty} × {item.title}</span>
+              <span>{item.qty} × {item.name}</span>
               <span>{formatPrice(item.price * item.qty)}</span>
             </li>
           ))}
@@ -125,7 +122,7 @@ function Ordersida() {
   Vad den gör:
   Ett form-objekt i state istället för ett state per fält
   validate() visar tydliga felmeddelanden under varje fält
-  Gratis frakt över $50, annars $4.95
+  Gratis frakt över 499 kr, annars 49 kr (regler i format.js)
   Fix: kundvagnen töms efter lagd order och bekräftelsen visar ordernummer
 */
 
