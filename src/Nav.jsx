@@ -1,28 +1,48 @@
+import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { useCart } from './cartContext'
 
+const LINKS = [
+  { to: '/', label: 'Butik', end: true },
+  { to: '/ritualer', label: 'Ritualer' },
+  { to: '/hitta-din-ritual', label: 'Hitta din ritual' },
+  { to: '/om-oss', label: 'Om oss' },
+]
+
 function Nav({ onCartClick }) {
   const { count } = useCart()
+  const [isOpen, setIsOpen] = useState(false)
+
+  // Enkelt är bättre än smart: menyn stängs när man klickar på en länk
+  const closeMenu = () => setIsOpen(false)
 
   return (
     <header className="header">
-      <nav className="nav">
-        <Link to="/" className="brand">
-          {/* Logo från public mappen */}
+      <nav className="nav" aria-label="Huvudmeny">
+        <button
+          className="menu-button"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+          aria-controls="nav-links"
+        >
+          {isOpen ? 'Stäng' : 'Meny'}
+        </button>
+
+        <Link to="/" className="brand" onClick={closeMenu}>
           <img className="brand-logo" src="/Senbonlogo.jpg" alt="" />
           <span className="brand-name">Senbon Zakura</span>
         </Link>
 
-        <ul className="nav-links">
-          {/* NavLink får klassen "active" automatiskt när man är på sidan */}
-          <li><NavLink className="nav-link" to="/" end>Shop</NavLink></li>
-          <li><NavLink className="nav-link" to="/rituals">Rituals</NavLink></li>
-          <li><NavLink className="nav-link" to="/order">Checkout</NavLink></li>
+        <ul id="nav-links" className={`nav-links ${isOpen ? 'is-open' : ''}`}>
+          {LINKS.map(l => (
+            <li key={l.to}>
+              <NavLink className="nav-link" to={l.to} end={l.end} onClick={closeMenu}>{l.label}</NavLink>
+            </li>
+          ))}
         </ul>
 
-        {/* aria-label hjälper skärmläsare förstå knappen */}
-        <button className="cart-button" onClick={onCartClick} aria-label={`Open bag, ${count} items`}>
-          Bag
+        <button className="cart-button" onClick={onCartClick} aria-label={`Öppna kassen, ${count} produkter`}>
+          Kassen
           <span className="cart-count">{count}</span>
         </button>
       </nav>
@@ -32,11 +52,7 @@ function Nav({ onCartClick }) {
 
 /*
   Nav.jsx Navigationsfältet längst upp
-
-  Vad den gör:
-  Visar logga, länkar och en knapp som öppnar kundvagnen
-  count kommer från CartProvider och visar antal produkter
-  Fix: Checkout-länken gick tidigare till "/" istället för "/order"
+  På mobil döljs länkarna bakom en Meny-knapp (aria-expanded berättar för skärmläsare)
 */
 
 export default Nav

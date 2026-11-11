@@ -1,9 +1,9 @@
 import { useParams, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { fetchProduct } from './api'
-import { PRODUCTS, getRitual, categoryLabel } from './data/catalog'
+import { PRODUCTS, getRitual, getProduct, categoryLabel, setValue } from './data/catalog'
 import { useCart } from './cartContext'
-import { formatPrice } from './format'
+import { formatPrice, FREE_SHIPPING_FROM } from './format'
 import ProductImage from './ProductImage'
 import ProductCard from './ProductCard'
 import Reviews, { Stars } from './Reviews'
@@ -34,13 +34,13 @@ function Produktside({ onAdded }) {
     return () => { ignore = true }
   }, [id])
 
-  if (result.id !== id) return <p className="status">Loading…</p>
+  if (result.id !== id) return <p className="status">Laddar…</p>
 
   if (result.error) {
     return (
       <div className="status">
-        <p>We couldn’t find this product.</p>
-        <Link className="btn btn-outline" to="/">Back to shop</Link>
+        <p>Vi hittade inte den här produkten.</p>
+        <Link className="btn btn-outline" to="/">Tillbaka till butiken</Link>
       </div>
     )
   }
@@ -48,7 +48,11 @@ function Produktside({ onAdded }) {
   const { product } = result
   const ritual = getRitual(product.ritual)
 
-  // "Complete the ritual": andra produkter från samma ritual
+  // Presentset: vad ingår och hur mycket sparar kunden?
+  const contents = product.contents?.map(getProduct).filter(Boolean) ?? []
+  const saving = setValue(product) - product.price
+
+  // "Fullborda ritualen": andra produkter från samma ritual
   const related = PRODUCTS.filter(p => p.ritual === product.ritual && p.id !== product.id).slice(0, 4)
 
   function handleAdd() {
@@ -66,44 +70,61 @@ function Produktside({ onAdded }) {
         </div>
 
         <div className="pdp-info">
-          <nav className="breadcrumb" aria-label="Breadcrumb">
-            <Link to="/">Shop</Link> / <Link to={`/rituals/${ritual.slug}`}>{ritual.name}</Link>
+          <nav className="breadcrumb" aria-label="Brödsmulor">
+            <Link to="/">Butik</Link> / <Link to={`/ritualer/${ritual.slug}`}>{ritual.name}</Link>
           </nav>
           <p className="eyebrow">{categoryLabel(product.category)} · {product.size}</p>
           <h1 className="pdp-title">{product.name}</h1>
           <RatingLink productId={product.id} />
-          <p className="pdp-price">{formatPrice(product.price)}</p>
+          <p className="pdp-price">
+            {formatPrice(product.price)}
+            {saving > 0 && <span className="saving">Spara {formatPrice(saving)}</span>}
+          </p>
           <p className="pdp-desc">{product.description}</p>
 
-          <ul className="notes" aria-label="Scent notes">
+          {contents.length > 0 && (
+            <div className="set-contents">
+              <p className="eyebrow">Det här ingår</p>
+              <ul>
+                {contents.map(item => (
+                  <li key={item.id}>
+                    <Link to={`/produkt/${item.id}`}>{item.name}</Link>
+                    <span className="muted">{item.size}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <ul className="notes" aria-label="Doftnoter">
             {product.notes.map(n => <li key={n}>{n}</li>)}
           </ul>
 
           <div className="pdp-actions">
-            <div className="qty" aria-label="Quantity">
-              <button onClick={() => setQty(q => Math.max(1, q - 1))} aria-label="Decrease quantity">−</button>
+            <div className="qty" aria-label="Antal">
+              <button onClick={() => setQty(q => Math.max(1, q - 1))} aria-label="Minska antal">−</button>
               <span>{qty}</span>
-              <button onClick={() => setQty(q => q + 1)} aria-label="Increase quantity">+</button>
+              <button onClick={() => setQty(q => q + 1)} aria-label="Öka antal">+</button>
             </div>
             <button className="btn btn-dark pdp-add" onClick={handleAdd}>
-              Add to bag · {formatPrice(product.price * qty)}
+              Lägg i kassen · {formatPrice(product.price * qty)}
             </button>
           </div>
 
           {/* details/summary är ett inbyggt dragspel i HTML, ingen JavaScript behövs */}
           <div className="accordion">
             <details open>
-              <summary>How to use</summary>
+              <summary>Så använder du</summary>
               <p>{product.howTo}</p>
             </details>
             <details>
-              <summary>The ritual</summary>
+              <summary>Ritualen</summary>
               <p>{ritual.story}</p>
-              <Link to={`/rituals/${ritual.slug}`} className="text-link">Discover {ritual.name} →</Link>
+              <Link to={`/ritualer/${ritual.slug}`} className="text-link">Upptäck {ritual.name} →</Link>
             </details>
             <details>
-              <summary>Delivery & returns</summary>
-              <p>Free delivery on orders over 499 kr. Delivered in 2–4 working days. Unopened products can be returned within 30 days.</p>
+              <summary>Leverans & retur</summary>
+              <p>Fri frakt över {formatPrice(FREE_SHIPPING_FROM)}. Leverans inom 2–4 arbetsdagar. Oöppnade produkter kan returneras inom 30 dagar.</p>
             </details>
           </div>
         </div>
@@ -117,7 +138,7 @@ function Produktside({ onAdded }) {
       {related.length > 0 && (
         <section className="wrap related">
           <p className="eyebrow">{ritual.name}</p>
-          <h2 className="section-title">Complete the ritual</h2>
+          <h2 className="section-title">Fullborda ritualen</h2>
           <div className="grid">
             {related.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
@@ -132,8 +153,8 @@ function Produktside({ onAdded }) {
 
   Vad den gör:
   Hämtar produkten via api.js, visar fel om den inte finns
-  Doftnoter, dragspel (How to use, The ritual, Delivery), recensioner
-  "Complete the ritual" visar fler produkter från samma ritual = mer försäljning
+  Presentset visar innehåll och hur mycket kunden sparar
+  Doftnoter, dragspel, recensioner och "Fullborda ritualen"
 */
 
 export default Produktside

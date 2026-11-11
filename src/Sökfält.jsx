@@ -7,19 +7,17 @@ function Sökfält({ value, onSearch }) {
   // Debounce: väntar 300ms efter sista tangenttrycket innan filtret uppdateras
   useEffect(() => {
     const timer = setTimeout(() => onSearch(text.trim()), 300)
-
-    // Avbryter föregående timer varje gång användaren skriver
     return () => clearTimeout(timer)
   }, [text, onSearch])
 
   return (
     <div className="search">
-      <label htmlFor="search" className="visually-hidden">Search products</label>
+      <label htmlFor="search" className="visually-hidden">Sök produkter</label>
       <input
         id="search"
         type="search"
         className="search-input"
-        placeholder="Search products"
+        placeholder="Sök produkt eller doft"
         value={text}
         onChange={e => setText(e.target.value)}
       />
@@ -29,12 +27,7 @@ function Sökfält({ value, onSearch }) {
 
 /*
   Sökfält.jsx Sökruta med debounce
-
-  Vad den gör:
-  Lokal text state uppdateras vid varje bokstav så rutan känns snabb
-  Debounce gör att listan filtreras först när användaren slutat skriva
-  Fix: förut startade rutan tom efter sidbyte medan listan fortfarande var filtrerad
-  Nu startar den med value från App, så det man ser är alltid det som filtreras
+  Lokal text uppdateras vid varje bokstav, listan filtreras först efter 300ms paus
 */
 
 export default Sökfält

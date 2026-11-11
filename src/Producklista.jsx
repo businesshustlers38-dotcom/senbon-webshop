@@ -6,10 +6,10 @@ import Sökfält from './Sökfält'
 
 // Sorteringsalternativ: varje alternativ har en jämförelsefunktion
 const SORTS = {
-  featured: { label: 'Featured', compare: () => 0 },
-  'price-asc': { label: 'Price: low to high', compare: (a, b) => a.price - b.price },
-  'price-desc': { label: 'Price: high to low', compare: (a, b) => b.price - a.price },
-  name: { label: 'Name A–Z', compare: (a, b) => a.name.localeCompare(b.name) },
+  featured: { label: 'Utvalda', compare: () => 0 },
+  'price-asc': { label: 'Pris: lägst först', compare: (a, b) => a.price - b.price },
+  'price-desc': { label: 'Pris: högst först', compare: (a, b) => b.price - a.price },
+  name: { label: 'Namn A–Ö', compare: (a, b) => a.name.localeCompare(b.name, 'sv') },
 }
 
 function ProductList({ search, onSearch }) {
@@ -44,15 +44,15 @@ function ProductList({ search, onSearch }) {
     <section className="shop" id="shop">
       <div className="shop-head">
         <div>
-          <p className="eyebrow">All products</p>
-          <h2 className="section-title">Shop everyday essentials</h2>
+          <p className="eyebrow">Alla produkter</p>
+          <h2 className="section-title">Vardagens favoriter</h2>
         </div>
         <Sökfält value={search} onSearch={onSearch} />
       </div>
 
       <div className="toolbar">
-        <div className="chips" role="group" aria-label="Filter by category">
-          {[{ slug: 'all', label: 'All' }, ...CATEGORIES].map(c => (
+        <div className="chips" role="group" aria-label="Filtrera på kategori">
+          {[{ slug: 'all', label: 'Alla' }, ...CATEGORIES].map(c => (
             <button
               key={c.slug}
               className="chip"
@@ -65,7 +65,7 @@ function ProductList({ search, onSearch }) {
         </div>
 
         <label className="sort">
-          <span className="visually-hidden">Sort products</span>
+          <span className="visually-hidden">Sortera produkter</span>
           <select value={sort} onChange={e => setSort(e.target.value)}>
             {Object.entries(SORTS).map(([key, s]) => (
               <option key={key} value={key}>{s.label}</option>
@@ -74,13 +74,13 @@ function ProductList({ search, onSearch }) {
         </label>
       </div>
 
-      {loading && <p className="status">Loading products…</p>}
-      {error && <p className="status">Could not load products ({error}).</p>}
+      {loading && <p className="status">Laddar produkter…</p>}
+      {error && <p className="status">Produkterna kunde inte laddas ({error}).</p>}
       {!loading && !error && sorted.length === 0 && (
-        <p className="status">No products match “{search}”.</p>
+        <p className="status">Inga produkter matchar ”{search}”.</p>
       )}
 
-      {!loading && sorted.length > 0 && <p className="muted small result-count">{sorted.length} products</p>}
+      {!loading && sorted.length > 0 && <p className="muted small result-count">{sorted.length} produkter</p>}
 
       <div className="grid">
         {sorted.map(product => <ProductCard key={product.id} product={product} />)}

@@ -1,39 +1,33 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { getReviews, addReview as saveReview } from './backend'
 
 /*
   useReviews.js Egen hook för recensioner
 
-  Recensionerna sparas i webbläsarens localStorage per produkt.
-  Det betyder att bara DU ser dina recensioner (ingen server än).
-  Med en riktig backend ändrar du bara den här filen.
+  Hämtar och sparar via backend.js, som väljer Supabase eller localStorage.
+  status: 'loading' | 'ready' | 'error'
 */
-
-function load(key) {
-  try {
-    const saved = JSON.parse(localStorage.getItem(key))
-    return Array.isArray(saved) ? saved : []
-  } catch {
-    return []
-  }
-}
-
 export function useReviews(productId) {
-  const key = `senbon-reviews-${productId}`
-  const [reviews, setReviews] = useState(() => load(key))
+  const [state, setState] = useState({ status: 'loading', reviews: [] })
 
-  function addReview(review) {
-    const next = [{ ...review, date: new Date().toISOString() }, ...reviews]
-    setReviews(next)
-    try {
-      localStorage.setItem(key, JSON.stringify(next))
-    } catch {
-      // Sparas inte, men visas ändå tills sidan laddas om
-    }
+  useEffect(() => {
+    let ignore = false
+    getReviews(productId)
+      .then(reviews => !ignore && setState({ status: 'ready', reviews }))
+      .catch(() => !ignore && setState({ status: 'error', reviews: [] }))
+    return () => { ignore = true }
+  }, [productId])
+
+  async function addReview(review) {
+    const saved = await saveReview(productId, review)
+    // Lägger den nya recensionen först utan att hämta om allt
+    setState(s => ({ ...s, reviews: [saved, ...s.reviews] }))
   }
 
+  const { reviews } = state
   const average = reviews.length
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
     : 0
 
-  return { reviews, average, addReview }
+  return { ...state, average, addReview }
 }

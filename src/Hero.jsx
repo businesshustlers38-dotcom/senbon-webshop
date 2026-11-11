@@ -22,16 +22,16 @@ function Hero() {
       </div>
 
       <div className="hero-inner">
-        <p className="eyebrow eyebrow-light fade-up">The Sakura Collection</p>
+        <p className="eyebrow eyebrow-light fade-up">Sakura-kollektionen</p>
         <h1 className="hero-title fade-up" style={{ animationDelay: '0.15s' }}>
-          Turn everyday moments<br />into small rituals
+          Gör vardagens stunder<br />till små ritualer
         </h1>
         <p className="hero-text fade-up" style={{ animationDelay: '0.3s' }}>
-          Body care, fragrance and home essentials inspired by the calm of a thousand cherry blossoms.
+          Kroppsvård, doft och hem, inspirerat av lugnet under tusen körsbärsblommor.
         </p>
         <div className="hero-ctas fade-up" style={{ animationDelay: '0.45s' }}>
-          <a href="#shop" className="btn btn-light">Shop now</a>
-          <a href="#rituals" className="btn btn-ghost">Explore rituals</a>
+          <a href="#shop" className="btn btn-light">Handla nu</a>
+          <a href="#rituals" className="btn btn-ghost">Utforska ritualer</a>
         </div>
       </div>
     </section>

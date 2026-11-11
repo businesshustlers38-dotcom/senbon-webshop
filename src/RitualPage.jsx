@@ -7,7 +7,7 @@ import Rituals from './Rituals'
 
 // Ordningen för stegen i en rutin: först rengöra, sist doft och hem
 const STEP_ORDER = ['face', 'body', 'fragrance', 'home']
-const STEP_VERB = { face: 'Cleanse & care', body: 'Nourish the body', fragrance: 'Scent yourself', home: 'Set the mood' }
+const STEP_VERB = { face: 'Rengör & vårda', body: 'Ge kroppen omsorg', fragrance: 'Bär din doft', home: 'Skapa stämningen' }
 
 function RitualPage() {
   const { slug } = useParams()
@@ -21,12 +21,12 @@ function RitualPage() {
     return () => { ignore = true }
   }, [slug])
 
-  if (result.slug !== slug) return <p className="status">Loading…</p>
+  if (result.slug !== slug) return <p className="status">Laddar…</p>
   if (result.error) {
     return (
       <div className="status">
-        <p>This ritual doesn’t exist.</p>
-        <Link className="btn btn-outline" to="/rituals">See all rituals</Link>
+        <p>Den här ritualen finns inte.</p>
+        <Link className="btn btn-outline" to="/ritualer">Se alla ritualer</Link>
       </div>
     )
   }
@@ -50,7 +50,7 @@ function RitualPage() {
       </header>
 
       <section className="wrap steps">
-        <h2 className="section-title">Your {ritual.name} routine</h2>
+        <h2 className="section-title">Din {ritual.name}-rutin</h2>
         <ol className="step-list">
           {steps.map((step, i) => (
             <li key={step.cat}>
@@ -66,7 +66,7 @@ function RitualPage() {
       </section>
 
       <section className="wrap related">
-        <h2 className="section-title">Shop {ritual.name}</h2>
+        <h2 className="section-title">Handla {ritual.name}</h2>
         <div className="grid">
           {products.map(p => <ProductCard key={p.id} product={p} />)}
         </div>
@@ -78,7 +78,7 @@ function RitualPage() {
 }
 
 /*
-  RitualPage.jsx Sida för en ritual, t.ex. /rituals/hinoki-forest
+  RitualPage.jsx Sida för en ritual, t.ex. /ritualer/hinoki-forest
 
   Vad den gör:
   Läser slug från URL:en och hämtar ritualen och dess produkter

@@ -90,6 +90,17 @@ const SHAPES = {
       <Label y={146} w={50} ink={c.ink} />
     </>
   ),
+  box: c => (
+    <>
+      {/* Presentask med lock och sidenband */}
+      <rect x="40" y="120" width="120" height="96" rx="3" fill={c.body} />
+      <rect x="34" y="104" width="132" height="24" rx="3" fill={c.body} />
+      <rect x="34" y="104" width="132" height="24" rx="3" fill="#000" opacity="0.06" />
+      <rect x="94" y="104" width="12" height="112" fill={c.cap} />
+      <path d="M100 104 C80 80 66 92 78 104 Z M100 104 C120 80 134 92 122 104 Z" fill={c.cap} />
+      <Label text="SENBON ZAKURA" y={160} w={88} ink={c.ink} />
+    </>
+  ),
   soap: c => (
     <>
       <rect x="38" y="150" width="124" height="64" rx="28" fill={c.body} />

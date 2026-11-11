@@ -31,23 +31,23 @@ function Cart({ open, onClose }) {
       <aside
         className={`drawer ${open ? 'is-open' : ''}`}
         aria-hidden={!open}
-        aria-label="Shopping bag"
+        aria-label="Kassen"
         inert={!open}
       >
         <div className="drawer-head">
-          <h2>Your bag</h2>
-          <button className="icon-btn" onClick={onClose} aria-label="Close bag">✕</button>
+          <h2>Din kasse</h2>
+          <button className="icon-btn" onClick={onClose} aria-label="Stäng kassen">✕</button>
         </div>
 
         {cart.length > 0 && (
           <div className="ship-progress">
-            <p>{left > 0 ? <>You are <strong>{formatPrice(left)}</strong> away from free delivery</> : 'You have unlocked free delivery'}</p>
+            <p>{left > 0 ? <>Du har <strong>{formatPrice(left)}</strong> kvar till fri frakt</> : 'Du har fri frakt!'}</p>
             <div className="bar"><span style={{ width: `${progress}%` }} /></div>
           </div>
         )}
 
         {cart.length === 0 ? (
-          <p className="drawer-empty">Your bag is empty.</p>
+          <p className="drawer-empty">Din kasse är tom.</p>
         ) : (
           <ul className="drawer-items">
             {/* Produktens id som key, nu finns varje produkt bara en gång */}
@@ -58,12 +58,12 @@ function Cart({ open, onClose }) {
                   <p className="line-title">{item.name}</p>
                   <p className="line-price">{item.size} · {formatPrice(item.price)}</p>
                   <div className="qty qty-sm">
-                    <button onClick={() => setQty(item.id, item.qty - 1)} aria-label={`Decrease ${item.name}`}>−</button>
+                    <button onClick={() => setQty(item.id, item.qty - 1)} aria-label={`Minska ${item.name}`}>−</button>
                     <span>{item.qty}</span>
-                    <button onClick={() => setQty(item.id, item.qty + 1)} aria-label={`Increase ${item.name}`}>+</button>
+                    <button onClick={() => setQty(item.id, item.qty + 1)} aria-label={`Öka ${item.name}`}>+</button>
                   </div>
                 </div>
-                <button className="link-btn" onClick={() => removeFromCart(item.id)}>Remove</button>
+                <button className="link-btn" onClick={() => removeFromCart(item.id)}>Ta bort</button>
               </li>
             ))}
           </ul>
@@ -71,12 +71,12 @@ function Cart({ open, onClose }) {
 
         <div className="drawer-foot">
           <div className="row">
-            <span>Subtotal</span>
+            <span>Delsumma</span>
             <strong>{formatPrice(subtotal)}</strong>
           </div>
           {cart.length > 0 && (
-            <Link to="/order" className="btn btn-dark btn-block" onClick={onClose}>
-              Checkout
+            <Link to="/kassa" className="btn btn-dark btn-block" onClick={onClose}>
+              Till kassan
             </Link>
           )}
         </div>

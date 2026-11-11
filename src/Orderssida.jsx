@@ -2,56 +2,74 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from './cartContext'
 import { formatPrice, FREE_SHIPPING_FROM, SHIPPING_COST } from './format'
+import { createOrder, isDemo } from './backend'
 
 // Enkel validering, returnerar ett objekt med felmeddelanden per fält
 function validate(form) {
   const errors = {}
-  if (form.name.trim().length < 2) errors.name = 'Please enter your full name.'
-  if (!/^\S+@\S+\.\S+$/.test(form.email)) errors.email = 'Please enter a valid email.'
-  if (form.address.trim().length < 5) errors.address = 'Please enter your address.'
+  if (form.name.trim().length < 2) errors.name = 'Skriv ditt för- och efternamn.'
+  if (!/^\S+@\S+\.\S+$/.test(form.email)) errors.email = 'Skriv en giltig e-postadress.'
+  if (form.address.trim().length < 5) errors.address = 'Skriv din adress.'
   return errors
 }
+
+const FIELDS = [
+  { name: 'name', label: 'För- och efternamn', autoComplete: 'name' },
+  { name: 'email', label: 'E-post', type: 'email', autoComplete: 'email' },
+  { name: 'address', label: 'Leveransadress', autoComplete: 'street-address' },
+]
 
 function Ordersida() {
   const { cart, subtotal, clearCart } = useCart()
   const [form, setForm] = useState({ name: '', email: '', address: '' })
   const [errors, setErrors] = useState({})
+  const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState('')
 
-  // Sparar den lagda ordern så bekräftelsen kan visas efter att kundvagnen tömts
+  // Sparar den lagda ordern så bekräftelsen kan visas efter att kassen tömts
   const [placedOrder, setPlacedOrder] = useState(null)
 
   const shipping = subtotal >= FREE_SHIPPING_FROM || subtotal === 0 ? 0 : SHIPPING_COST
   const total = subtotal + shipping
 
-  // En funktion för alla fält, name-attributet bestämmer vilket fält som ändras
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  function handleSubmit(e) {
-    // Stoppar webbläsarens vanliga omladdning vid submit
+  async function handleSubmit(e) {
     e.preventDefault()
     const found = validate(form)
     setErrors(found)
     if (Object.keys(found).length > 0) return
 
-    setPlacedOrder({
-      number: `SZ-${Date.now().toString().slice(-6)}`,
-      name: form.name.trim(),
-      email: form.email,
-      total,
-    })
-    clearCart()
+    setSending(true)
+    setSendError('')
+    try {
+      const order = await createOrder({
+        customer: { name: form.name.trim(), email: form.email.trim(), address: form.address.trim() },
+        // Sparar bara det som behövs om varje rad, inte hela produkten
+        items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
+        subtotal,
+        shipping,
+        total,
+      })
+      setPlacedOrder(order)
+      clearCart()
+    } catch {
+      setSendError('Ordern kunde inte skickas. Kontrollera din anslutning och försök igen.')
+    } finally {
+      setSending(false)
+    }
   }
 
   if (placedOrder) {
     return (
       <section className="confirm">
         <p className="eyebrow">Order {placedOrder.number}</p>
-        <h1 className="section-title">Thank you, {placedOrder.name}</h1>
-        <p>Your order of {formatPrice(placedOrder.total)} is confirmed. A receipt will be sent to {placedOrder.email}.</p>
-        <p className="muted">(Demo shop: no payment has been taken.)</p>
-        <Link to="/" className="btn btn-dark">Continue shopping</Link>
+        <h1 className="section-title">Tack, {placedOrder.customer.name}</h1>
+        <p>Din order på {formatPrice(placedOrder.total)} är mottagen. En bekräftelse skickas till {placedOrder.customer.email}.</p>
+        <p className="muted">(Demobutik: ingen betalning har dragits.)</p>
+        <Link to="/" className="btn btn-dark">Fortsätt handla</Link>
       </section>
     )
   }
@@ -59,23 +77,18 @@ function Ordersida() {
   if (cart.length === 0) {
     return (
       <section className="confirm">
-        <h1 className="section-title">Your bag is empty</h1>
-        <Link to="/" className="btn btn-dark">Discover the shop</Link>
+        <h1 className="section-title">Din kasse är tom</h1>
+        <Link to="/" className="btn btn-dark">Upptäck butiken</Link>
       </section>
     )
   }
 
   return (
     <section className="checkout">
-      {/* noValidate: vi visar egna felmeddelanden istället för webbläsarens */}
       <form className="checkout-form" onSubmit={handleSubmit} noValidate>
-        <h1 className="section-title">Checkout</h1>
+        <h1 className="section-title">Kassa</h1>
 
-        {[
-          { name: 'name', label: 'Full name', autoComplete: 'name' },
-          { name: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
-          { name: 'address', label: 'Delivery address', autoComplete: 'street-address' },
-        ].map(field => (
+        {FIELDS.map(field => (
           <div className="field" key={field.name}>
             <label htmlFor={field.name}>{field.label}</label>
             <input
@@ -94,12 +107,19 @@ function Ordersida() {
           </div>
         ))}
 
-        <button type="submit" className="btn btn-dark btn-block">Place order</button>
-        <p className="muted small">Payment will be added later. No card is charged.</p>
+        {sendError && <p className="field-error" role="alert">{sendError}</p>}
+
+        <button type="submit" className="btn btn-dark btn-block" disabled={sending}>
+          {sending ? 'Skickar…' : 'Lägg order'}
+        </button>
+        <p className="muted small">
+          Betalning läggs till senare. Inget kort debiteras.
+          {isDemo && ' Demo: ordern sparas bara i den här webbläsaren.'}
+        </p>
       </form>
 
       <aside className="summary">
-        <h2>Order summary</h2>
+        <h2>Ordersammanfattning</h2>
         <ul className="summary-items">
           {cart.map(item => (
             <li key={item.id}>
@@ -108,9 +128,9 @@ function Ordersida() {
             </li>
           ))}
         </ul>
-        <div className="row"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-        <div className="row"><span>Shipping</span><span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span></div>
-        <div className="row row-total"><span>Total</span><span>{formatPrice(total)}</span></div>
+        <div className="row"><span>Delsumma</span><span>{formatPrice(subtotal)}</span></div>
+        <div className="row"><span>Frakt</span><span>{shipping === 0 ? 'Fri' : formatPrice(shipping)}</span></div>
+        <div className="row row-total"><span>Totalt</span><span>{formatPrice(total)}</span></div>
       </aside>
     </section>
   )
@@ -120,10 +140,10 @@ function Ordersida() {
   Ordersida.jsx Kassan
 
   Vad den gör:
-  Ett form-objekt i state istället för ett state per fält
-  validate() visar tydliga felmeddelanden under varje fält
-  Gratis frakt över 499 kr, annars 49 kr (regler i format.js)
-  Fix: kundvagnen töms efter lagd order och bekräftelsen visar ordernummer
+  Validerar fälten och visar felmeddelanden under varje fält
+  Skickar ordern via backend.js (Supabase eller localStorage)
+  Knappen visar "Skickar…" och är avstängd så ingen klickar två gånger
+  Tömmer kassen och visar ordernummer när ordern är sparad
 */
 
 export default Ordersida
