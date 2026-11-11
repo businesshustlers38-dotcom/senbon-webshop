@@ -1,116 +1,115 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { fetchProducts, CATEGORIES, categoryLabel } from './api'
+import { useCart } from './cartContext'
+import { formatPrice } from './format'
+import Sökfält from './Sökfält'
 
-function ProductList({search, addToCart}) {
-
-  // State för produkterna från API:et
-  const [products, setproducts] = useState ([])
-
-  // State för laddningsstatus börjar som true eftersom vi alltid laddar vid start
+function ProductList({ search, onSearch }) {
+  const { addToCart } = useCart()
+  const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
-
-  // State för felmeddelande börjar som null vilket betyder inget fel
   const [error, setError] = useState(null)
+  const [category, setCategory] = useState('all')
 
-  // useEffect med tom array [] körs en gång när komponenten laddas
-  useEffect (() => { 
-    
-    // Async funktion för att hämta produkter från DummyJSON API
-    async function fetchProducts() {
-  
-      try {   
-        const res = await fetch('https://dummyjson.com/products')
+  // Ökas för att köra hämtningen igen när man klickar "Try again"
+  const [retry, setRetry] = useState(0)
 
-         // Kollar om svaret var lyckat fetch kastar inte fel automatiskt för 404
-        if (!res.ok) throw new  Error(`HTTP Error: ${res.status}`)
+  useEffect(() => {
+    // AbortController avbryter hämtningen om komponenten försvinner
+    const controller = new AbortController()
 
-        // Omvandlar svaret till ett JavaScript objekt
-        const data = await res.json()
-
-        
-        // Sparar produkterna i state vilket triggar en omritning
-        setproducts(data.products)
-      } catch (err) { 
-        
-      // Om något går fel sparas felmeddelandet i state
-        setError(err.message)
+    async function load() {
+      setLoading(true)
+      setError(null)
+      try {
+        setProducts(await fetchProducts(controller.signal))
+      } catch (err) {
+        // AbortError är inget riktigt fel, vi avbröt själva
+        if (err.name !== 'AbortError') setError(err.message)
       } finally {
-
-      // Körs alltid oavsett om det lyckades eller misslyckades
-        setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }
 
-  // Anropar funktionen direkt kan inte sätta async på useEffect callbacken    
-   fetchProducts() 
- },[])
+    load()
+    return () => controller.abort()
+  }, [retry])
 
+  // Filtrerar på kategori OCH söktext (titel, varumärke eller kategori)
+  const query = search.toLowerCase()
+  const filtered = products.filter(p => {
+    const inCategory = category === 'all' || p.category === category
+    const text = `${p.title} ${p.brand ?? ''} ${p.category}`.toLowerCase()
+    return inCategory && text.includes(query)
+  })
 
-
-
-
-// Filtrerar produkterna baserat på söktexten
-// toLowerCase på båda sidor gör sökningen skiftlägesokänslig
-const filtered = products.filter(product => product.title.toLowerCase()
-.includes(search.toLowerCase()))
-
- // Visar laddningsmeddelande medan data hämtas
-if (loading) return <p>Loading products...</p>
-
- // Visar felmeddelande om något gick fel
-if (error)   return <p>Error: {error}</p>
-
-
-return (
- 
-  <div>
-
-    <h2>Products</h2>
-    
-    <div id="products">
-
-  {/* Loopar igenom filtrerade produkter och skapar ett kort för varje */}
-    {filtered.map(product => (
-
-
-    <div key={product.id} className="card">
-     
-      <img src={product.thumbnail} alt={product.title} width="100" />
-
-      {/* Länk till produktsidan med produktens id i URL:en */}
-
-      <Link to={`/product/${product.id}`}>{product.title}</Link>
-
-      <p>${product.price}</p> 
-      
-       {/* Anropar addToCart från App.jsx när knappen klickas */}
-       <button onClick={() => addToCart(product)} >Add to Cart</button>
-      
+  return (
+    <section className="shop" id="shop">
+      <div className="shop-head">
+        <h2 className="section-title">Shop the rituals</h2>
+        <Sökfält value={search} onSearch={onSearch} />
       </div>
 
-  
-    ))}
+      {/* Kategoriknappar, aria-pressed berättar för skärmläsare vilken som är vald */}
+      <div className="chips" role="group" aria-label="Filter by category">
+        {[{ slug: 'all', label: 'All' }, ...CATEGORIES].map(c => (
+          <button
+            key={c.slug}
+            className="chip"
+            aria-pressed={category === c.slug}
+            onClick={() => setCategory(c.slug)}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
 
-  </div>
+      {loading && <p className="status">Loading products…</p>}
 
-    </div>
-)
+      {error && (
+        <div className="status">
+          <p>Could not load products ({error}).</p>
+          <button className="btn btn-outline" onClick={() => setRetry(r => r + 1)}>Try again</button>
+        </div>
+      )}
+
+      {!loading && !error && filtered.length === 0 && (
+        <p className="status">No products match “{search}”.</p>
+      )}
+
+      <div className="grid">
+        {filtered.map(product => (
+          <article key={product.id} className="card">
+            <Link to={`/product/${product.id}`} className="card-media">
+              <img src={product.thumbnail} alt={product.title} loading="lazy" />
+            </Link>
+            <div className="card-body">
+              <p className="eyebrow">{categoryLabel(product.category)}</p>
+              <h3 className="card-title">
+                <Link to={`/product/${product.id}`}>{product.title}</Link>
+              </h3>
+              <p className="price">{formatPrice(product.price)}</p>
+            </div>
+            <button className="btn btn-dark card-btn" onClick={() => addToCart(product)}>
+              Add to bag
+            </button>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
 }
 
 /*
-  Producklista.jsx Visar alla produkter från DummyJSON API
+  Producklista.jsx Visar produkter från DummyJSON
 
   Vad den gör:
-  useEffect hämtar produkter från API:et en gång när sidan laddas
-  try/catch/finally hanterar fel om API:et inte svarar
-  loading state visar laddningsmeddelande medan data hämtas
-  error state visar felmeddelande om något går fel
-  filter filtrerar produkter baserat på söktexten från App.jsx
-  map loopar igenom produkterna och skapar ett kort för varje
-
-  Props den tar emot:
-  search från App.jsx för att filtrera produkter
-  addToCart från App.jsx för att lägga till i kundvagnen
+  Hämtar bara vardagskategorier (hudvård, skönhet, doft, hem) via api.js
+  AbortController stoppar anropet om användaren lämnar sidan
+  "Try again" kör hämtningen igen genom att ändra retry
+  Filtrerar på både kategori och söktext
+  Fix: förut hämtades bara 30 produkter, nu hämtas alla i valda kategorier
 */
 
 export default ProductList

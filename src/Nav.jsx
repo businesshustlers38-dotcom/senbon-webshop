@@ -1,37 +1,41 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from 'react-router-dom'
+import { useCart } from './cartContext'
 
-function Nav() {
-  
-   // Jag använder min gamla CSS-klasser från den gamla Senbonzakura projekt
+function Nav({ onCartClick }) {
+  const { count } = useCart()
+
   return (
-    <header className="Huvudsidan">
-     <nav className="Meny">
+    <header className="header">
+      <nav className="nav">
+        <Link to="/" className="brand">
+          {/* Logo från public mappen */}
+          <img className="brand-logo" src="/Senbonlogo.jpg" alt="" />
+          <span className="brand-name">Senbon Zakura</span>
+        </Link>
 
-       {/* Logo från public mappen */}
-      <img className="nav-logo" src="/Senbonlogo.jpg" alt="Senbon Zakura logo" />
-      
-      <ul className="Meny-lista">
-        
- {/* Link från React Router navigerar utan att ladda om sidan */}
-        <li><Link className="nav-länk" to="/">Hem</Link></li>
-          <li><Link className="nav-länk" to="/">Ordern</Link></li>
+        <ul className="nav-links">
+          {/* NavLink får klassen "active" automatiskt när man är på sidan */}
+          <li><NavLink className="nav-link" to="/" end>Shop</NavLink></li>
+          <li><NavLink className="nav-link" to="/order">Checkout</NavLink></li>
+        </ul>
 
-      </ul>
-
-     </nav>
+        {/* aria-label hjälper skärmläsare förstå knappen */}
+        <button className="cart-button" onClick={onCartClick} aria-label={`Open bag, ${count} items`}>
+          Bag
+          <span className="cart-count">{count}</span>
+        </button>
+      </nav>
     </header>
   )
 }
 
 /*
-  Nav.jsx Navigationsfältet längst upp på sidan
+  Nav.jsx Navigationsfältet längst upp
 
   Vad den gör:
-  Visar logotypen och navigeringslänkar
-  Link från React Router navigerar utan att ladda om sidan
-  Använder CSS-klasser från App.css för styling
-
-  Ingen props statisk komponent utan data
+  Visar logga, länkar och en knapp som öppnar kundvagnen
+  count kommer från CartProvider och visar antal produkter
+  Fix: Checkout-länken gick tidigare till "/" istället för "/order"
 */
 
 export default Nav
