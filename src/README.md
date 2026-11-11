@@ -1,20 +1,31 @@
 # Senbon Zakura Webshop
 
-## Installation
-1. Kopiera detta repo
-2. Kör `npm install`
-3. Kör `npm run dev`
-4. Öppna `http://localhost:5173`
+En premium-butik för vardagsprodukter (hudvård, skönhet, doft, hem) byggd med React + Vite.
 
-## Funktioner
-- Produktlista från DummyJSON API
-- Sök med debounce med 500ms fördröjning
-- Varukorg
-- Orderöversikt
-- React Router navigering
+## Installation
+1. `npm install`
+2. `npm run dev`
+3. Öppna `http://localhost:5173`
+
+## Struktur
+| Fil | Ansvar |
+|---|---|
+| `api.js` | All kommunikation med DummyJSON (kategorier, felhantering, avbrytning) |
+| `CartProvider.jsx` + `cartContext.js` | Kundvagnen: useReducer, antal, localStorage |
+| `format.js` | Prisformat med Intl.NumberFormat |
+| `Producklista.jsx` / `Sökfält.jsx` | Butiken, kategorifilter, sök med debounce |
+| `Produktside.jsx` | Produktsida med galleri och antal |
+| `Cart.jsx` | Kundvagnslåda som glider in från höger |
+| `Orderssida.jsx` | Kassa med validering och frakt |
+| `App.css` | Designsystemet, alla färger/typsnitt är variabler i `:root` |
 
 ## Debounce
-Jag använde setTimeout och clearTimeout inuti useEffect för att vänta 500ms efter att användaren slutat skriva innan en sökförfrågan skickas.
+Sökrutan väntar 300ms efter sista tangenttrycket innan listan filtreras lokalt.
+Det gör att listan inte ritas om vid varje bokstav. (Inget API-anrop görs vid sökning.)
 
 ## Felhantering
-Jag använde try/catch inuti useEffect när jag hämtade produkter. Om begäran misslyckas visas ett felmeddelande för användaren.
+`api.js` kollar `res.ok` för alla anrop. Produktlistan har en "Try again"-knapp
+och produktsidan visar ett fel om produkten inte finns.
+
+## Nästa steg
+- Betalning med Stripe Checkout (kräver en liten backend, t.ex. Vercel-funktion)

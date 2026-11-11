@@ -5,6 +5,8 @@ import Cart from './Cart'
 import ProductList from './Producklista'
 import Produktside from './Produktside'
 import Ordersida from './Orderssida'
+import Hero from './Hero'
+import Footer from './Footer'
 import './App.css'
 
 function App() {
@@ -16,6 +18,7 @@ function App() {
 
   return (
     <div className="app">
+      <p className="announcement">Free shipping on orders over $50 · Complimentary gift wrapping</p>
       <Nav onCartClick={() => setCartOpen(true)} />
 
       <Cart open={cartOpen} onClose={() => setCartOpen(false)} />
@@ -25,7 +28,12 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={<ProductList search={search} onSearch={setSearch} />}
+            element={
+              <>
+                <Hero />
+                <ProductList search={search} onSearch={setSearch} />
+              </>
+            }
           />
           <Route
             path="/product/:id"
@@ -35,6 +43,8 @@ function App() {
           <Route path="*" element={<p className="status">Page not found.</p>} />
         </Routes>
       </main>
+
+      <Footer />
     </div>
   )
 }
