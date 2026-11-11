@@ -103,7 +103,7 @@ function Reviews({ productId }) {
 
       <ul className="review-list">
         {reviews.map(r => (
-          <li key={r.date} className="review">
+          <li key={r.id ?? r.date} className="review">
             <Stars rating={r.rating} size="0.9rem" />
             <p className="review-text">{r.text}</p>
             <p className="muted small">{r.name} · {new Date(r.date).toLocaleDateString('sv-SE')}</p>

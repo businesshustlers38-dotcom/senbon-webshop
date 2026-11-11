@@ -80,6 +80,20 @@ Kolla sedan Supabase → **Table Editor → orders**: status ska vara `betald`.
 - Prislogiken testas med `npm run test:pricing`.
 - Innan du tar riktiga pengar: byt till live-nycklar i Stripe, sätt `SITE_URL` till din riktiga domän, och läs på om moms, köpvillkor och ångerrätt (distansavtalslagen).
 
+## Adminsidan (/admin)
+Översikt (försäljning, snittorder, att skicka, mest sålda), ordrar med status, moderering av recensioner
+och nyhetsbrevslistan med CSV-export. Sidan är inte länkad i menyn och har `noindex`.
+
+- **Demo-läge:** öppnas direkt och visar data från din egen webbläsare.
+- **Med Supabase:** kräver inloggning. Gör dig själv till admin:
+  1. Supabase → **Authentication → Users → Add user** (e-post + starkt lösenord)
+  2. Kopiera användarens **User UID**
+  3. SQL Editor: `insert into admins (user_id) values ('din-user-uid');`
+
+Säkerhet: inloggningen i React är bara en dörr. Låset är RLS i `schema.sql`, så även om någon
+hittar `/admin` får de inte se en enda order utan att stå i tabellen `admins`.
+Admin kan bara ändra kolumnen `status` på en order, aldrig priser eller kunduppgifter.
+
 ## Byta till riktiga produktfoton
 1. Fotografera alla produkter på samma sätt: samma ljusa bakgrund, samma vinkel, dagsljus från sidan
 2. Beskär till **4:5 (t.ex. 1200 × 1500 px)**, produkten centrerad med luft runt om

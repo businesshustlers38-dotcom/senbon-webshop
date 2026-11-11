@@ -58,3 +58,40 @@ create table if not exists orders (
   created_at timestamptz not null default now()
 );
 alter table orders enable row level security;
+
+-- =========================================================
+-- ADMIN (kör den här delen också)
+-- =========================================================
+-- Vem som är admin bestäms HÄR i databasen, inte i React-koden.
+-- Lägg till dig själv: skapa en användare i Authentication → Users → Add user,
+-- kopiera dess User UID och kör:
+--   insert into admins (user_id) values ('din-user-uid');
+
+create table if not exists admins (
+  user_id uuid primary key references auth.users (id) on delete cascade
+);
+alter table admins enable row level security;
+-- En inloggad användare får bara se om HEN SJÄLV är admin
+create policy "Se sin egen admin-rad" on admins for select using (user_id = auth.uid());
+
+-- Hjälpfunktion: är den inloggade användaren admin?
+create or replace function is_admin() returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from admins where user_id = auth.uid());
+$$;
+
+-- Ordrar: admin får läsa och ändra status
+create policy "Admin läser ordrar" on orders for select using (is_admin());
+create policy "Admin ändrar ordrar" on orders for update using (is_admin()) with check (is_admin());
+-- Bara kolumnen status får ändras, inte priser eller kunduppgifter
+revoke update on orders from authenticated;
+grant update (status) on orders to authenticated;
+alter table orders add constraint orders_status_check check (
+  status in ('väntar på betalning', 'betalning behandlas', 'betald', 'skickad', 'levererad', 'avbruten', 'betalning misslyckades')
+);
+
+-- Nyhetsbrev: admin får läsa listan
+create policy "Admin läser nyhetsbrev" on newsletter for select using (is_admin());
+
+-- Recensioner: admin får ta bort (moderering)
+create policy "Admin tar bort recensioner" on reviews for delete using (is_admin());

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, lazy, Suspense } from 'react'
 import { Routes, Route, Link } from 'react-router-dom'
 import Nav from './Nav'
 import Cart from './Cart'
@@ -12,6 +12,9 @@ import Story from './Story'
 import OmOss from './OmOss'
 import Quiz from './Quiz'
 import OrderKlar from './OrderKlar'
+
+// lazy: admin-koden laddas bara ner när någon går till /admin
+const Admin = lazy(() => import('./Admin'))
 import Footer from './Footer'
 import ScrollToTop from './ScrollToTop'
 import { formatPrice, FREE_SHIPPING_FROM } from './format'
@@ -62,6 +65,10 @@ function App() {
           <Route path="/om-oss" element={<OmOss />} />
           <Route path="/kassa" element={<Ordersida />} />
           <Route path="/kassa/klar" element={<OrderKlar />} />
+          <Route
+            path="/admin"
+            element={<Suspense fallback={<p className="status">Laddar…</p>}><Admin /></Suspense>}
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
@@ -83,6 +90,7 @@ function App() {
   /om-oss             Om oss
   /kassa              Kassa
   /kassa/klar         Tack-sida efter Stripe-betalning
+  /admin              Admin (ordrar, recensioner, nyhetsbrev), inte länkad i menyn
   *                   404
 */
 

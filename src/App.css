@@ -546,6 +546,48 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
 .quiz-gift { margin-top: 2.5rem; text-align: center; font-size: 1.05rem; }
 .quiz-gift a { text-underline-offset: 4px; }
 
+/* ===== Admin ===== */
+.admin { padding-top: 3rem; padding-bottom: 5rem; }
+.admin-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 2rem; }
+.admin-actions { display: flex; align-items: center; gap: 1.25rem; }
+.admin-tabs { display: flex; gap: 2rem; border-bottom: 1px solid var(--line); margin-bottom: 2rem; overflow-x: auto; }
+.admin-tab {
+  background: none; border: 0; padding: 0.75rem 0;
+  font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.admin-tab[aria-selected="true"] { border-color: var(--ink); }
+.admin-h2 { font-size: 1.6rem; margin: 2.5rem 0 1rem; }
+.admin-login { max-width: 24rem; margin: 0 auto; padding: 5rem var(--gutter); }
+.admin-login .section-title { margin-bottom: 2rem; }
+
+.stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+.stats li { background: var(--surface); border: 1px solid var(--line); padding: 1.25rem 1.5rem; }
+.stats li.is-highlight { border-color: var(--accent); }
+.stats strong { display: block; font-family: var(--font-display); font-size: 2rem; font-weight: 500; }
+.top-list { margin: 0; padding: 0; list-style: none; max-width: 32rem; }
+.top-list li { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid var(--line); }
+
+/* Breda tabeller scrollar i sidled på mobil istället för att spräcka layouten */
+.table-wrap { overflow-x: auto; margin-top: 1.5rem; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; min-width: 640px; }
+.admin-table th { text-align: left; font-weight: 500; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 0.75rem 0.75rem 0.75rem 0; border-bottom: 1px solid var(--ink); }
+.admin-table td { padding: 0.75rem 0.75rem 0.75rem 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.status-select { padding: 0.35rem 0.6rem; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font: inherit; font-size: 0.82rem; color: var(--ink); }
+.status-betald { background: #f4e6cf; border-color: var(--gold); }
+.status-skickad { background: #e3e8e1; border-color: #7d8f80; }
+.status-levererad { background: #e6e3ec; }
+.status-avbruten, .status-betalning-misslyckades { background: #f6dcd7; border-color: var(--error); }
+.order-details td { background: var(--surface); }
+.order-details-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; padding: 0.5rem 0; }
+.order-details ul { margin: 0 0 0.5rem; padding-left: 1rem; }
+
+.admin-reviews { list-style: none; padding: 0; margin: 0; }
+.admin-reviews li { display: flex; justify-content: space-between; gap: 1.5rem; padding: 1.25rem 0; border-bottom: 1px solid var(--line); }
+.admin-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.sub-list { list-style: none; padding: 0; margin: 1rem 0 0; max-width: 40rem; }
+.sub-list li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
+
 /* ===== Mobil ===== */
 @media (max-width: 800px) {
   .nav { grid-template-columns: 1fr auto 1fr; }
@@ -565,6 +607,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.
   .nav-links li:last-child .nav-link { border-bottom: 0; }
   .quiz-answers { grid-template-columns: 1fr; }
   .values { grid-template-columns: 1fr; }
+  .order-details-grid { grid-template-columns: 1fr; gap: 1rem; }
   .brand-name { font-size: 1.2rem; }
   .pdp, .checkout { grid-template-columns: 1fr; }
   .pdp-image { position: relative; top: 0; }
