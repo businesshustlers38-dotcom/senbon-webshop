@@ -34,7 +34,8 @@ function Reviews({ productId }) {
       setForm(EMPTY)
       setError('')
       setOpen(false)
-    } catch {
+    } catch (err) {
+      console.error('Recensionen kunde inte sparas:', err)
       setError('Recensionen kunde inte sparas. Försök igen.')
     } finally {
       setSending(false)

@@ -21,7 +21,8 @@ function Newsletter() {
     try {
       await subscribe(email)
       setStatus('done')
-    } catch {
+    } catch (err) {
+      console.error('Nyhetsbrev kunde inte sparas:', err)
       setStatus('failed')
     }
   }
