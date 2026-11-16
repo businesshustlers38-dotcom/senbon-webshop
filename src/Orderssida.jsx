@@ -60,7 +60,8 @@ function Ordersida() {
       setPlacedOrder({ ...result.order, total })
       clearCart()
       setSending(false)
-    } catch {
+    } catch (err) {
+      console.error('Betalningen kunde inte startas:', err)
       setSendError('Betalningen kunde inte startas. Kontrollera din anslutning och försök igen.')
       setSending(false)
     }
