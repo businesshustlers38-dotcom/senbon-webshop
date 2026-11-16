@@ -1,0 +1,14 @@
+# Supabase CLI-inställningar för projektet (används av `npx supabase ...`).
+project_id = "senbon-webshop"
+
+# create-checkout anropas från webbläsaren med den publika nyckeln.
+# Nya "publishable"-nycklar är inte JWT, så JWT-kontrollen skulle neka anropet (401).
+# Funktionen litar ändå inte på någon användare: den kontrollerar all indata
+# och hämtar priserna själv från databasen.
+[functions.create-checkout]
+verify_jwt = false
+
+# stripe-webhook anropas av Stripe (utan Supabase-nyckel).
+# Säkerheten är Stripes signatur, som funktionen kontrollerar.
+[functions.stripe-webhook]
+verify_jwt = false

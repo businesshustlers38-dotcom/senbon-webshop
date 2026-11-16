@@ -56,11 +56,13 @@ Webbläsare ── {id, antal} ──► create-checkout (server) ── riktiga
 Kör i terminalen i projektmappen (byt ut `<projekt-ref>` mot ID:t i din Supabase-URL):
 ```bash
 npx supabase login
-npx supabase link --project-ref <projekt-ref>
+npx supabase link <projekt-ref>
 npx supabase secrets set STRIPE_SECRET_KEY=sk_test_... SITE_URL=http://localhost:5173
 npx supabase functions deploy create-checkout
-npx supabase functions deploy stripe-webhook --no-verify-jwt
+npx supabase functions deploy stripe-webhook
 ```
+JWT-kontrollen är avstängd för båda funktionerna i `supabase/config.toml`
+(nya publishable-nycklar är inte JWT, och webhooken anropas av Stripe).
 
 ### Steg 4: Webhook (så ordern markeras som betald)
 1. Stripe → **Developers → Webhooks → Add endpoint**

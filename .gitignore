@@ -26,3 +26,6 @@ dist-ssr
 # Hemliga inställningar
 .env
 .env.local
+
+# Supabase CLI (lokal länkning, ska inte committas)
+supabase/.temp
