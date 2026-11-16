@@ -191,7 +191,7 @@ function ReviewsAdmin() {
     let ignore = false
     getAllReviews()
       .then(reviews => !ignore && setState({ status: 'ready', reviews }))
-      .catch(() => !ignore && setState({ status: 'error', reviews: [] }))
+      .catch(err => { console.error('Recensioner kunde inte hämtas:', err); if (!ignore) setState({ status: 'error', reviews: [] }) })
     return () => { ignore = true }
   }, [])
 
@@ -228,7 +228,7 @@ function Subscribers() {
 
   useEffect(() => {
     let ignore = false
-    getSubscribers().then(data => !ignore && setList(data)).catch(() => !ignore && setList([]))
+    getSubscribers().then(data => !ignore && setList(data)).catch(err => { console.error('Nyhetsbrevslistan kunde inte hämtas:', err); if (!ignore) setList([]) })
     return () => { ignore = true }
   }, [])
 
@@ -272,13 +272,13 @@ function Admin() {
   }, [])
 
   useEffect(() => {
-    getAdmin().then(setAdmin).catch(() => setAdmin(null))
+    getAdmin().then(setAdmin).catch(err => { console.error('Admin-kontroll misslyckades:', err); setAdmin(null) })
   }, [])
 
   const loadOrders = useCallback(() => {
     return getOrders()
       .then(list => setOrders({ status: 'ready', list }))
-      .catch(() => setOrders({ status: 'error', list: [] }))
+      .catch(err => { console.error('Ordrar kunde inte hämtas:', err); setOrders({ status: 'error', list: [] }) })
   }, [])
 
   useEffect(() => {
@@ -291,7 +291,8 @@ function Admin() {
     setOrders(o => ({ ...o, list: o.list.map(x => (x.number === number ? { ...x, status } : x)) }))
     try {
       await updateOrderStatus(number, status)
-    } catch {
+    } catch (err) {
+      console.error('Statusen kunde inte sparas:', err)
       setOrders(o => ({ ...o, list: previous }))
       window.alert('Statusen kunde inte sparas.')
     }
