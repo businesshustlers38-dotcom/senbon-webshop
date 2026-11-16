@@ -31,6 +31,7 @@ function Login({ onSignedIn }) {
     try {
       onSignedIn(await adminSignIn(form.email, form.password))
     } catch (err) {
+      console.error('Inloggning misslyckades:', err)
       setError(err.message === 'Kontot är inte admin' ? err.message : 'Fel e-post eller lösenord.')
     } finally {
       setSending(false)
