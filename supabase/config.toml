@@ -7,8 +7,11 @@ project_id = "senbon-webshop"
 # och hämtar priserna själv från databasen.
 [functions.create-checkout]
 verify_jwt = false
+# Våra funktioner är skrivna i JavaScript (CLI:t letar annars efter index.ts)
+entrypoint = "./functions/create-checkout/index.js"
 
 # stripe-webhook anropas av Stripe (utan Supabase-nyckel).
 # Säkerheten är Stripes signatur, som funktionen kontrollerar.
 [functions.stripe-webhook]
 verify_jwt = false
+entrypoint = "./functions/stripe-webhook/index.js"
