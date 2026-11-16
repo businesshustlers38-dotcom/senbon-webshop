@@ -76,6 +76,18 @@ Starta om `npm run dev`, lägg något i kassen och betala med testkortet
 `4242 4242 4242 4242`, valfritt framtida datum och valfri CVC.
 Kolla sedan Supabase → **Table Editor → orders**: status ska vara `betald`.
 
+### Felsökning (problem vi faktiskt stött på)
+| Symptom | Orsak | Lösning |
+|---|---|---|
+| Footern säger fortfarande "lokalt läge" | `.env` tom/osparad, eller servern inte omstartad | Fyll i värdena på samma rad efter `=`, spara, starta om `npm run dev` |
+| 404 på `/rest/v1/...` | URL:en i `.env` slutar på `/rest/v1/` | URL:en ska sluta på `.supabase.co` |
+| Deploy: "Entrypoint path does not exist ... index.ts" | CLI:t letar efter TypeScript | `entrypoint` i `supabase/config.toml` (redan fixat) |
+| Kassan: `secret_key_required` i funktionsloggen | `STRIPE_SECRET_KEY` innehåller `pk_test_` | Sätt om med `sk_test_`-nyckeln |
+| Ordern fastnar på "väntar på betalning" | Webhooken når inte fram | Stripe → Webhooks → leveranser, och loggar för `stripe-webhook` |
+
+Tips: fel loggas i webbläsarens konsol (F12) och i Supabase → Edge Functions → Logs.
+Kolla en hemlighet utan att visa den: `npx supabase secrets list`. En digest som börjar på `e3b0c442` betyder TOMT värde.
+
 ### Säkerhetsregler (läs!)
 - `anon`-nyckeln får finnas i `.env` (den är publik). `service_role` och `sk_`-nycklar ALDRIG i `.env` eller i koden, bara i `supabase secrets`.
 - Ändrar du ett pris i `catalog.js`: kör `npm run db:products` och kör `supabase/products.sql` igen. Annars tar Stripe det gamla priset.
